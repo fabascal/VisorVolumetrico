@@ -1,0 +1,188 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Reportes {% endblock %} 
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed {% endblock body_class %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+  <!-- DataTables -->
+  <link rel="stylesheet" href="/static/assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="/static/assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+
+{% endblock stylesheets %}
+
+{% block content %}    
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Reportes XML</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="{{url_for('home_blueprint.index')}}">Dashboard</a></li>
+              <li class="breadcrumb-item active">Reportes XML</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <!-- SELECT2 EXAMPLE -->
+        <div class="card card-default">
+          <div class="card-header">
+            <h3 class="card-title">Reportes por dia</h3>
+            <div class="card-tools">
+              
+              
+              <div class="input-group date" id="reservationdate" data-target-input="nearest">
+                <div class="input-group-append" >
+                  <button id="fecha-input" class="input-group-text"><i class="fas fa-sync"></i></button>
+              </div>
+                  <input id="fecha"  type="text" class="datetimepicker-input" data-target="#reservationdate" style="text-align: center;" />
+                  <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
+                      <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                  </div>
+              </div>
+            </div>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body">
+            <table id="stations" class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th style="display:none;">Id</th>
+                  <th>Estación</th>
+                  <th>Fecha</th>
+                  <th>Estado</th>
+                  <th>Archivo</th>
+                  <th>Detalle</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for reporte in reportes %}
+              <tr>
+                <td style="display:none;" class="nr">{{reporte.id}}</td>
+                <td class="etiqueta-nombre">{{ reporte.estacion.nombre }}</td>
+                <td class="etiqueta-fecha">{{ reporte.fecha }}</td>
+                <td>{{ reporte.estado }}</td>
+                <td style="text-align: center;"><a style="cursor:pointer;" class="genExcelFlask"><i class="far fa-file-excel"></i></a></td>
+                <td style="text-align: center;"><a href="{{url_for('home_blueprint.reporte_detail', id_reporte=reporte.id)}}"><i class="fas fa-file-alt"></i></a></td>
+              </tr>
+              {% endfor %}
+              </tbody>
+              <!--<tfoot>
+              <tr>
+                <th>Rendering engine</th>
+                <th>Browser</th>
+                <th>Platform(s)</th>
+                <th>Engine version</th>
+                <th>CSS grade</th>
+              </tr>
+              </tfoot>-->
+            </table>  
+          </div>
+          <!-- /.card-body -->
+          <div class="card-footer">
+            <!--Espacio para leyenda, o agregar algun boton-->
+          </div>
+        </div>
+        <!-- /.card -->
+    </section>
+    <!-- /.content -->
+  </div>
+{% endblock content %}
+
+{% block javascripts %}
+ <!-- jQuery -->
+ <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+ <!-- Bootstrap 4 -->
+ <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+ <!-- InputMask -->
+ <script src="/static/assets/plugins/moment/moment.min.js"></script>
+ <script src="/static/assets/plugins/inputmask/jquery.inputmask.min.js"></script>
+ <!-- Tempusdominus Bootstrap 4 -->
+ <script src="/static/assets/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+ <!-- AdminLTE App -->
+ <script src="/static/assets/js/adminlte.min.js"></script>
+ <!-- DataTables -->
+ <script src="/static/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+ <script src="/static/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+ <script src="/static/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+ <script src="/static/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+ 
+<!-- Page script -->
+<script>
+  $(function () {
+    $("#stations").DataTable({
+      "responsive": false,
+      "autoWidth": false,
+      "language": {
+        "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+    }
+    });
+  });
+  $(function () {
+    //Date range picker
+    $('#reservationdate').datetimepicker({
+        format: 'DD-MM-YYYY',
+    });
+  });
+
+$("#fecha-input").on("click", function(){
+  fecha = $("#fecha").val();
+  año = fecha.substring(6,10);
+  mes = fecha.substring(3,5);
+  dia = fecha.substring(0,2);
+  fecha_api = año+"-"+mes+"-"+dia;
+  $.ajax({
+    type:"POST",
+    dataType: "json",
+    url: "/reportes/"+fecha_api,
+    contentType: "application/json",
+    success:function(data){
+      window.location.href = "/reportes/"+fecha_api
+    }
+  });
+});
+
+$(".genExcelFlask").on("click", function(){
+  var id = $(this).closest("tr").find(".nr").text();
+  var nombre = $(this).closest("tr").find(".etiqueta-nombre").text();
+  var fecha = $(this).closest("tr").find(".etiqueta-fecha").text();
+  
+  fetch("{{ url_for('home_blueprint.download', id_reporte='IDREPORTE') }}".replace("IDREPORTE",id))
+  .then((resp) => resp.blob())
+  .then((blob) => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+    // the filename you want
+    a.download = nombre+"-"+fecha+".xlsx";
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    //alert("your file has downloaded!"); // or you know, something with better UX...
+  })
+  .catch(() => alert("oh no!"));
+});
+
+</script>
+{% endblock javascripts %}

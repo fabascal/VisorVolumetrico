@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="{{url_for('static', filename='assets/favicon.ico')}}" type="image/x-icon">
+  <!--Font para toda la web-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;1,100;1,300;1,400&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+
+  <title>
+    Visor - {% block title %}{% endblock %}
+  </title> 
+
+  <!-- Specific Page CSS goes HERE  -->  
+  {% block stylesheets %}{% endblock stylesheets %}
+
+</head>
+<body class="hold-transition {% block body_class %}{% endblock body_class %}">
+
+  {% block content %}{% endblock content %}
+
+  <!-- Specific Page JS goes HERE  -->
+  {% block javascripts %}{% endblock javascripts %}
+
+</body>
+</html>

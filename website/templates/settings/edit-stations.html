@@ -1,0 +1,266 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Estacion {% endblock %} 
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+  <!-- iCheck for checkboxes and radio inputs -->
+  <link rel="stylesheet" href="/static/assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <!-- Select2 -->
+  <link rel="stylesheet" href="/static/assets/plugins/select2/css/select2.min.css">
+  <link rel="stylesheet" href="/static/assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+{% endblock stylesheets %}
+
+{% block content %}    
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Estaciones</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="{{url_for('home_blueprint.index')}}">Dashboard</a></li>
+              <li class="breadcrumb-item"><a href="{{url_for('settings_blueprint.stations')}}">Estaciones</a></li>
+              <li class="breadcrumb-item active">Estacion</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        
+        <!-- SELECT2 EXAMPLE -->
+        <div class="card card-default">
+          <div class="card-header">
+            <h3 class="card-title">Edición de estacion</h3>
+
+            <div class="card-tools">
+              
+              
+            </div>
+          </div>
+          <!-- /.card-header -->
+          <form method="POST">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <!-- Nombre -->
+                <div class="form-group">
+                  <label>Nombre:</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fas fa-signature"></i></span>
+                    </div>
+                    <input name="nombre" type="text" class="form-control" required style="text-transform: uppercase;" value="{{ estacion.nombre }}">
+                  </div>
+                  <!-- /.input group -->
+                </div>
+                <!-- /.form group -->
+
+                <!-- CRE -->
+                <div class="form-group">
+                  <label>Numero Permiso CRE:</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                    </div>
+                    <input name="numeroPermisoCRE" type="text" class="form-control" required style="text-transform: uppercase;" value="{{ estacion.numeroPermisoCRE}}">
+                  </div>
+                  <!-- /.input group -->
+                </div>
+                <!-- RUTA -->
+                <div class="form-group">
+                    <label>RUTA:</label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                      </div>
+                      <input name="ruta" type="text" class="form-control" required value="{{ estacion.ruta}}">
+                    </div>
+                    <!-- /.input group -->
+                  </div>
+                
+              </div>
+              <!-- /.col -->
+              <div class="col-md-6">
+                <!-- RFC -->
+                <!-- /.form group -->
+                <div class="form-group">
+                  <label>Empresa</label>
+                  <select name="empresa" class="form-control select2bs4" style="width: 100%;" required >
+                    {% for empresa in empresas %}
+                        {% if empresa.nombre == estacion.id_empresa %}
+                            <option selected="selected">{{ empresa.nombre }}</option>
+                        {% else %}
+                            <option value={{empresa.id}}>{{ empresa.nombre }}</option>
+                        {% endif %}
+                    {% endfor %}
+                  </select>
+                </div>
+                <!-- /.form-group -->
+                <!-- /.form group -->
+                <div class="form-group">
+                  <label>Zona</label>
+                  <select name="zona" class="form-control select2bs4" style="width: 100%;" required >
+                    {% for zona in zonas %}
+                        {% if zona.nombre == estacion.id_zona %}
+                            <option selected="selected">{{ zona.nombre }}</option>
+                        {% else %}
+                            <option >{{ zona.nombre }}</option>
+                        {% endif %}
+                    {% endfor %}
+                  </select>
+                </div>
+                <!-- /.form-group -->
+                <!-- /.form group -->
+                <div class="form-group">
+                    <label>Activa:</label>
+                    <div class="input-group">
+                      {% if estacion.activo %}
+                        <input type="checkbox" name="activo" checked data-bootstrap-switch data-off-color="danger" data-on-color="success">
+                      {% else %}
+                        <input type="checkbox" name="activo" data-bootstrap-switch data-off-color="danger" data-on-color="success">
+                      {% endif %}
+                    </div>
+                  </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+          </div>
+          <!-- /.card-body -->
+          <div class="card-footer" style="display:flex">
+            <button type="submit" class="btn btn-primary" style="margin-left: auto;" >Guardar</button>
+          </div>
+        </div>
+        <!-- /.card -->
+      </form>
+
+        
+        
+        <!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+  <!-- jQuery -->
+  <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+  <!-- Bootstrap 4 -->
+  <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- Select2 -->
+  <script src="/static/assets/plugins/select2/js/select2.full.min.js"></script>
+  <!-- Bootstrap4 Duallistbox -->
+  <script src="/static/assets/plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js"></script>
+  <!-- InputMask -->
+  <script src="/static/assets/plugins/moment/moment.min.js"></script>
+  <script src="/static/assets/plugins/inputmask/jquery.inputmask.min.js"></script>
+  <!-- date-range-picker -->
+  <script src="/static/assets/plugins/daterangepicker/daterangepicker.js"></script>
+  <!-- bootstrap color picker -->
+  <script src="/static/assets/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
+  <!-- Tempusdominus Bootstrap 4 -->
+  <script src="/static/assets/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+  <!-- Bootstrap Switch -->
+  <script src="/static/assets/plugins/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+  <!-- AdminLTE App -->
+  <script src="/static/assets/js/adminlte.min.js"></script>
+  <!-- AdminLTE for demo purposes -->
+  <script src="/static/assets/js/demo.js"></script>
+
+  <script>
+    $(function () {
+      //Initialize Select2 Elements
+      $('.select2').select2()
+
+      //Initialize Select2 Elements
+      $('.select2bs4').select2({
+        theme: 'bootstrap4'
+      })
+
+      //Datemask dd/mm/yyyy
+      $('#datemask').inputmask('dd/mm/yyyy', { 'placeholder': 'dd/mm/yyyy' })
+      //Datemask2 mm/dd/yyyy
+      $('#datemask2').inputmask('mm/dd/yyyy', { 'placeholder': 'mm/dd/yyyy' })
+      //Money Euro
+      $('[data-mask]').inputmask()
+
+      //Date range picker
+      $('#reservationdate').datetimepicker({
+          format: 'L'
+      });
+      //Date range picker
+      $('#reservation').daterangepicker()
+      //Date range picker with time picker
+      $('#reservationtime').daterangepicker({
+        timePicker: true,
+        timePickerIncrement: 30,
+        locale: {
+          format: 'MM/DD/YYYY hh:mm A'
+        }
+      })
+      //Date range as a button
+      $('#daterange-btn').daterangepicker(
+        {
+          ranges   : {
+            'Today'       : [moment(), moment()],
+            'Yesterday'   : [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+            'Last 7 Days' : [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+            'This Month'  : [moment().startOf('month'), moment().endOf('month')],
+            'Last Month'  : [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+          },
+          startDate: moment().subtract(29, 'days'),
+          endDate  : moment()
+        },
+        function (start, end) {
+          $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'))
+        }
+      )
+
+      //Timepicker
+      $('#timepicker').datetimepicker({
+        format: 'LT'
+      })
+
+      //Bootstrap Duallistbox
+      $('.duallistbox').bootstrapDualListbox()
+
+      //Colorpicker
+      $('.my-colorpicker1').colorpicker()
+      //color picker with addon
+      $('.my-colorpicker2').colorpicker()
+
+      $('.my-colorpicker2').on('colorpickerChange', function(event) {
+        $('.my-colorpicker2 .fa-square').css('color', event.color.toString());
+      });
+
+      $("input[data-bootstrap-switch]").each(function(){
+        $(this).bootstrapSwitch('state', $(this).prop('checked'));
+      });
+
+    })
+  </script>
+{% endblock javascripts %}

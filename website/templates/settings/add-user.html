@@ -1,0 +1,92 @@
+{% extends "index.html" %}
+
+{% block title %}Nuevo usuario{% endblock %}
+
+{% block main_content %}
+<div class="main-users">
+    <div class="add-user">
+        <form class="form-add-user" method="POST" autocomplete="off">
+            <div class="element">
+                <label for="nombre">Nombre</label>
+                {% if data.usuario_editar %}
+                    <input type="text" name="nombre" id="nombre" placeholder="Nombre" required="true" autofocus="true"  value="{{ data.usuario_editar.nombre }}"/>
+                {% else %}
+                    <input type="text" name="nombre" id="nombre" placeholder="Nombre" required="true" autofocus="true"/>
+                {% endif %}
+            </div>
+            <div class="element">
+                <label for="correo">Correo</label>
+                {% if data.usuario_editar %}
+                    <input type="email" name="correo" id="correo" placeholder="Correo" required="true" value="{{ data.usuario_editar.correo }}"/>
+                {% else %}
+                    <input type="email" name="correo" id="correo" placeholder="Correo" required="true" />
+                {% endif %}
+            </div>
+            <div class="element">
+                
+                {% if data.usuario_editar %}
+                   
+                {% else %}
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password" placeholder="Password" required="true" />
+                {% endif %}
+                
+            </div>
+            <div class="element row-space_between">
+                <div class="element-inner">
+                    {% if data.usuario_editar %}
+                        <select class="select" name="id_grupo" method="POST" action="/" >
+                            {% for grupo in data.grupos %}
+                                {% if grupo.id == data.usuario_editar.id_grupo %}
+                                    <option class="option" value= "{{grupo.id}}" SELECTED>{{grupo.nombre}}</option>
+                                {% else %}
+                                    <option class="option" value= "{{grupo.id}}">{{grupo.nombre}}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    {% else %}
+                        <select class="select" name="id_grupo" method="POST" action="/" >
+                            {% for grupo in data.grupos %}
+                                {% if grupo.id == "1" %}
+                                    <option class="option" value= "{{grupo.id}}" SELECTED>{{grupo.nombre}}</option>
+                                {% else %}
+                                    <option class="option" value= "{{grupo.id}}">{{grupo.nombre}}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    {% endif %}
+                </div>
+                <div class="element-inner element-inner-closer">
+                    <label for="descripcion">Activo</label>
+                    <label class="switch">
+                        {% if data.usuario_editar %}
+                            {% if data.usuario_editar.activo == false %}
+                                <input type="checkbox"  name="activo" value="activo"/>
+                            {% else %} 
+                                <input type="checkbox" checked name="activo" value="activo"/>
+                            {% endif %}
+                        {% else %}
+                            <input type="checkbox" checked name="activo" value="activo"/>
+                        {% endif %}
+                        <span class="slider round"></span>
+                      </label>
+                </div>
+            </div>
+            <div class="element">
+                <button class="btn-main">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+                        <path d="M0 0h24v24H0V0z" fill="none"/>
+                        <path d="M17.59 3.59c-.38-.38-.89-.59-1.42-.59H5c-1.11 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 
+                        2-2V7.83c0-.53-.21-1.04-.59-1.41l-2.82-2.83zM12 19c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 
+                        3-3 3zm1-10H7c-1.1 0-2-.9-2-2s.9-2 2-2h6c1.1 0 2 .9 2 2s-.9 2-2 2z"/>
+                    </svg>
+                    <span>Guardar</span>
+                </button>
+            </div>
+            <div class="edit-group-footer">
+                
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

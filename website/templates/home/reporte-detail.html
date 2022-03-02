@@ -1,0 +1,326 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Reporte detallado {% endblock %} 
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini layout-fixed {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+
+{% endblock stylesheets %}
+
+{% block content %}  
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Reporte detallado</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+                <li class="breadcrumb-item"><a href="{{url_for('home_blueprint.index')}}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{url_for('home_blueprint.reportes', fecha_api=reporte.fecha)}}">Reportes XML</a></li>
+                <li class="breadcrumb-item active">Reporte</li>
+              </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+
+      <!-- Default box -->
+      <div class="card">
+        <div class="card-header">
+          {%if reporte%}
+          <h3 class="card-title">Reporte de {{reporte.estacion.nombre}} del dia {{reporte.fecha}}</h3>
+          {% else %}
+          <h3 class="card-title">Projects Detail</h3>
+          {%endif%}
+
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+              <i class="fas fa-minus"></i>
+            </button>
+            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-12 col-md-12 col-lg-8 order-2 order-md-1">
+              <div class="row">
+                <div class="col-12 col-sm-4">
+                  <div class="info-box bg-light">
+                    <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">Litros comprados</span>
+                      <span class="info-box-number text-center text-muted mb-0">{{ "{:,.2f}".format(reporte.compra|map(attribute="volumenRecepcion")|sum) }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                  <div class="info-box bg-light">
+                    <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">Litros extraídos</span>
+                      <span class="info-box-number text-center text-muted mb-0">{{ "{:,.2f}".format(reporte.compra|map(attribute="volumenExtraccion")|sum) }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-4">
+                  <div class="info-box bg-light">
+                    <div class="info-box-content">
+                      <span class="info-box-text text-center text-muted">Litros vendidos</span>
+                      <span class="info-box-number text-center text-muted mb-0">{{ "{:,.2f}".format(reporte.venta|map(attribute="sumatoriaVolumenDespachado")|sum) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <h4>Detalle del reporte</h4>
+                    <div class="post">
+                      <div class="user-block">
+                        
+                        <div class="card">
+                          <div class="card-header">
+                            <h3 class="card-title">
+                              <img class="img-circle img-bordered-sm" src="/static/assets/img/gas-tank.jpg" alt="user image">
+                                <span class="username">
+                                  <a href="#">Tanques</a>
+                                </span>
+                                <span class="description">{{"{:,.0f}".format(reporte.compra|length)}} Tanques - Litros disponibles {{ "{:,.2f}".format(reporte.compra|map(attribute="volumenDisponible")|sum) }}</span>
+                            </h3>
+                          </div>
+                          <!-- /.card-header -->
+                          <div class="card-body p-0">
+                            <table id="tanques" class="table table-hover">
+                              <thead>
+                                <tr>
+                                  <th style="width: 10px">#</th>
+                                  <th>Producto</th>
+                                  <th>Disponible</th>
+                                  <th>Recepción</th>
+                                  <th>Capacidad</th>
+                                  <th>Estado</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for compra in reporte.compra %}
+                                <tr>
+                                  <td>{{ compra.numeroTanque}}</td>
+                                  <td>{{compra.producto.nombre }}</td>
+                                  <td>{{ "{:,.2f}".format(compra.volumenDisponible) }}</td>
+                                  <td>{{ "{:,.2f}".format(compra.volumenRecepcion) }}</td>
+                                  <td>{{ "{:,.2f}".format(compra.capacidadTotalTanque) }}</td>
+                                  <td style="text-align: center;">
+                                    {% if compra.estadoTanque != 'O' or compra.volumenAgua > 0 %}
+                                      <span class="badge bg-danger">
+                                        {% if compra.estadoTanque != 'O' %}
+                                        <i class="fas fa-house-damage"></i>
+                                        {% endif %}
+                                        {% if compra.volumenAgua > 0 %}
+                                        <i class="fas fa-tint"></i>
+                                        {% endif %}
+                                      </span>
+                                    {% else %}
+                                      <span class="badge bg-primary">
+                                        <i class="fas fa-check-circle"></i>
+                                      </span>
+                                    {% endif %}
+                                  </td>
+                                </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table>
+                          </div>
+                          <!-- /.card-body -->
+                        </div>
+                      
+                      </div>
+                      <!-- /.user-block -->
+                    </div>
+
+                    <div class="post clearfix">
+                      <div class="user-block">
+                        
+                        <div class="card">
+                          <div class="card-header">
+                            <h3 class="card-title">
+                              <img class="img-circle img-bordered-sm" src="/static/assets/img/fuel-pump.jpg" alt="User Image">
+                        <span class="username">
+                          <a href="#">Dispensarios</a>
+                        </span>
+                        <span class="description">{{"{:,.0f}".format(reporte.dispensarios)}} Dispensario(s) | {{"{:,.0f}".format(reporte.mangueras)}} Manguera(s) - Servicios realizados {{ "{:,.0f}".format(reporte.venta|map(attribute="numeroTotalRegistrosDetalle")|sum)}}</span>
+                            </h3>
+            
+                            <div class="card-tools">
+                              <ul class="pagination pagination-sm float-right">
+                                <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
+                                <li class="page-item"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+                              </ul>
+                            </div>
+                          </div>
+                          <!-- /.card-header -->
+                          <div class="card-body p-0">
+                            <table class="table">
+                              <thead>
+                                <tr>
+                                  <th style="width: 10px">#</th>
+                                  <th>Task</th>
+                                  <th>Progress</th>
+                                  <th style="width: 40px">Label</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>1.</td>
+                                  <td>Update software</td>
+                                  <td>
+                                    <div class="progress progress-xs">
+                                      <div class="progress-bar progress-bar-danger" style="width: 55%"></div>
+                                    </div>
+                                  </td>
+                                  <td><span class="badge bg-danger">55%</span></td>
+                                </tr>
+                                <tr>
+                                  <td>2.</td>
+                                  <td>Clean database</td>
+                                  <td>
+                                    <div class="progress progress-xs">
+                                      <div class="progress-bar bg-warning" style="width: 70%"></div>
+                                    </div>
+                                  </td>
+                                  <td><span class="badge bg-warning">70%</span></td>
+                                </tr>
+                                <tr>
+                                  <td>3.</td>
+                                  <td>Cron job running</td>
+                                  <td>
+                                    <div class="progress progress-xs progress-striped active">
+                                      <div class="progress-bar bg-primary" style="width: 30%"></div>
+                                    </div>
+                                  </td>
+                                  <td><span class="badge bg-primary">30%</span></td>
+                                </tr>
+                                <tr>
+                                  <td>4.</td>
+                                  <td>Fix and squish bugs</td>
+                                  <td>
+                                    <div class="progress progress-xs progress-striped active">
+                                      <div class="progress-bar bg-success" style="width: 90%"></div>
+                                    </div>
+                                  </td>
+                                  <td><span class="badge bg-success">90%</span></td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                          <!-- /.card-body -->
+                        </div>
+                      </div>
+                      <!-- /.user-block -->
+                      <p>
+                        <a href="#" class="link-black text-sm"><i class="fas fa-link mr-1"></i> Demo File 2</a>
+                      </p>
+                    </div>
+
+                    
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-md-12 col-lg-4 order-1 order-md-2">
+              <h3 class="text-primary"><i class="fas fa-paint-brush"></i> AdminLTE v3</h3>
+              <p class="text-muted">Raw denim you probably haven't heard of them jean shorts Austin. Nesciunt tofu stumptown aliqua butcher retro keffiyeh dreamcatcher synth. Cosby sweater eu banh mi, qui irure terr.</p>
+              <br>
+              <div class="text-muted">
+                <p class="text-sm">Client Company
+                  <b class="d-block">Deveint Inc</b>
+                </p>
+                <p class="text-sm">Project Leader
+                  <b class="d-block">Tony Chicken</b>
+                </p>
+              </div>
+
+              <h5 class="mt-5 text-muted">Reportes</h5>
+              <ul class="list-unstyled">
+                <li>
+                  <a href="{{url_for('home_blueprint.download', id_reporte=reporte.id)}}" class="btn-link text-secondary">
+                    <i class="far fa-fw fa-file-excel"></i> {{reporte.estacion.nombre}} {{reporte.fecha}}.xlsx</a>
+                </li>
+                <li>
+                  <a href="" class="btn-link text-secondary"><i class="far fa-fw fa-file-pdf"></i> UAT.pdf</a>
+                </li>
+                <li>
+                  <a href="" class="btn-link text-secondary"><i class="far fa-fw fa-envelope"></i> Email-from-flatbal.mln</a>
+                </li>
+                <li>
+                  <a href="" class="btn-link text-secondary"><i class="far fa-fw fa-image "></i> Logo.png</a>
+                </li>
+                <li>
+                  <a href="" class="btn-link text-secondary"><i class="far fa-fw fa-file-word"></i> Contract-10_12_2014.docx</a>
+                </li>
+              </ul>
+             
+            </div>
+          </div>
+        </div>
+        <!-- /.card-body -->
+      </div>
+      <!-- /.card -->
+
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+  <!-- jQuery -->
+  <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+  <!-- Bootstrap 4 -->
+  <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- AdminLTE App -->
+  <script src="/static/assets/js/adminlte.min.js"></script>
+  <!-- DataTables -->
+  <script src="/static/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+  <script src="/static/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+  <script src="/static/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+  <script src="/static/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+
+   <!-- page script -->
+   <script>
+    $(function () {
+      $("#tanques").DataTable({
+        "responsive": true,
+        "autoWidth": false,
+        "searching":false,
+        "paging": true,
+        "bLengthChange": false,
+        "bInfo":false,
+        "pageLength":4
+      });
+     
+    });
+  </script>
+
+{% endblock javascripts %}

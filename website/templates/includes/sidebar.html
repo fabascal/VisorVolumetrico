@@ -1,0 +1,173 @@
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="/" class="brand-link">
+      <img src="/static/assets/img/logo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+      <span class="brand-text font-weight-light">VisorVolumetrico</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Sidebar user panel (optional) -->
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="image">
+          <img src="/static/assets/img/avatar.png" class="img-circle elevation-2" alt="User Image">
+        </div>
+        <div class="info">
+          <a href="{{ url_for('authentication_blueprint.logout') }}" class="d-block">
+            {{ current_user.username }} - Logout
+          </a>
+        </div>
+      </div>
+
+      <!-- SidebarSearch Form -->
+      <div class="form-inline">
+        <div class="input-group" data-widget="sidebar-search">
+          <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
+          <div class="input-group-append">
+            <button class="btn btn-sidebar">
+              <i class="fas fa-search fa-fw"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <!-- Add icons to the links using the .nav-icon class
+               with font-awesome or any other icon font library -->
+          <li class="nav-item">
+            <a href="{{url_for('home_blueprint.index')}}" class="nav-link {% if 'index' in segment %} active {% endif %}">
+              <i class="nav-icon fas fa-tachometer-alt"></i>
+              <p>
+                Dashboard
+                <span class="right badge badge-danger">Mensual</span>
+              </p>
+            </a>
+          </li>
+          <li class="nav-item has-treeview {% if 'reportes' in segment %} menu-open {% endif %}">
+            <a href="#" class="nav-link {% if 'reportes' in segment %} active {% endif %}">
+              <i class="fas fa-tasks nav-icon"></i>
+              <p>
+                Procesamiento
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{{url_for('home_blueprint.reportes')}}" class="nav-link {% if 'reportes_dia' in segment %} active {% endif %}">
+                  <i class="fas fa-file-code nav-icon"></i>
+                  <p>Reportes XML</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/index2.html" class="nav-link {% if 'index2.html' in segment %} active {% endif %}">
+                  <i class="fas fa-calendar-alt nav-icon"></i>
+                  <p>Calendario</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/index3.html" class="nav-link {% if 'index3.html' in segment %} active {% endif %}">
+                  <i class="fas fa-server nav-icon"></i>
+                  <p>Volumetrico</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          
+          
+          {% if current_user.grupo.id in [1] %}
+          <li class="nav-header">CONFIGURACION</li>
+          <!--
+            Configuracion usuario
+          -->
+          <li class="nav-item has-treeview {% if 'usersSettings' in segment %} menu-open {% endif %}">
+            <a href="#" class="nav-link {% if 'usersSettings' in segment %} active {% endif %}">
+              <i class="nav-icon fas fa-users-cog"></i>
+              <p>
+                Config. Usuarios
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{{url_for('settings_blueprint.users')}}" class="nav-link {% if 'usersSettings_users' in segment %} active {% endif %}">
+                  <i class="fas fa-user nav-icon"></i>
+                  <p>Usuarios</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{url_for('settings_blueprint.groups')}}" class="nav-link {% if 'usersSettings_groups' in segment %} active {% endif %}">
+                  <i class="fas fa-users nav-icon"></i>
+                  <p>Grupos</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <!--
+            Configuracion emrpesa
+          -->
+          <li class="nav-item has-treeview {% if 'companySettings' in segment %} menu-open {% endif %}">
+            <a href="#" class="nav-link {% if 'companySettings' in segment %} active {% endif %}">
+              <i class="nav-icon far fa-building"></i>
+              <p>
+                Config. Empresa
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{{url_for('settings_blueprint.company')}}" class="nav-link {% if 'companySettings_company' in segment %} active {% endif %}">
+                  <i class="fas fa-building nav-icon"></i>
+                  <p>Empresa</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <!--
+            Configuracion estacion
+          -->
+          <li class="nav-item has-treeview {% if 'stationSettings' in segment %} menu-open {% endif %}">
+            <a href="#" class="nav-link {% if 'stationSettings' in segment %} active {% endif %}">
+              <i class="nav-icon fas fa-gas-pump"></i>
+              <p>
+                Config. Estaciones
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{{url_for('settings_blueprint.stations')}}" class="nav-link {% if 'stationSettings_stations' in segment %} active {% endif %}">
+                  <i class="fas fa-gas-pump nav-icon"></i>
+                  <p>Estacion</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{url_for('settings_blueprint.tanks')}}" class="nav-link {% if 'stationSettings_tanks' in segment %} active {% endif %}">
+                  <i class="fas fa-warehouse nav-icon"></i>
+                  <p>Tanques</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{url_for('settings_blueprint.products')}}" class="nav-link {% if 'stationSettings_products' in segment %} active {% endif %}">
+                  <i class="fas fa-box-open nav-icon"></i>
+                  <p>Productos</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{url_for('settings_blueprint.zones')}}" class="nav-link {% if 'stationSettings_zones' in segment %} active {% endif %}">
+                  <i class="fas fa-map-marked-alt nav-icon"></i>
+                  <p>Zona</p>
+                </a>
+              </li>
+              
+            </ul>
+          </li>
+          {% endif %}
+          
+             </div>
+    <!-- /.sidebar -->
+  </aside>
+  
