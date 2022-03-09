@@ -3,18 +3,17 @@
 Copyright (c) 2021 - present NovaRet
 """
 
-from asyncore import write
-from csv import writer
+
 import os
 from ast import arg
-from calendar import month
+
 from sqlalchemy.sql.expression import extract
 from sqlalchemy.sql.functions import session_user
 from sqlalchemy import and_, func, cast, Date, extract
 from website import db, scheduler, utils
 import website
 from website.home import blueprint
-from flask import render_template, request, jsonify, redirect, url_for, current_app, session, send_file, send_from_directory
+from flask import Response,render_template, request, jsonify, redirect, url_for, current_app, session, send_file, send_from_directory, make_response
 from flask_login import login_required, current_user
 from .models import Reporte, Reporte_Linea_Compra
 import datetime
@@ -30,7 +29,8 @@ import pysftp
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
 import pandas as pd
-from io import BytesIO
+
+import pdfkit
 
 
 @blueprint.route('/index')
@@ -38,8 +38,8 @@ from io import BytesIO
 def index():
     usuario = Usuario.query.filter_by(id=current_user.id).first()
     estaciones = db.session.query(Estacion).count()
-    #dia_uno = datetime.datetime(date.today().year,date.today().month,1)
-    dia_uno = datetime(2021,10,1)
+    dia_uno = datetime(date.today().year,date.today().month,1)
+    #dia_uno = datetime(2021,10,1)
     print (dia_uno)
     reportes = Reporte.query.filter(extract('month',Reporte.fecha) >= dia_uno.month).all()
     compra = venta_lts = venta_pesos = 0
@@ -69,6 +69,19 @@ def reporte_detail(id_reporte):
     print(id_reporte)
     reporte = Reporte.query.filter_by(id=id_reporte).first()
     return render_template('home/reporte-detail.html', segment='reportes_detalle', reporte=reporte)
+
+@blueprint.route('/reporte/tanques/<stations>/<start_date>/<end_date>', methods=['POST','GET'])
+@login_required
+def report_detail_tqs(start_date, end_date, stations):
+    reports = Reporte.query.filter(Reporte.fecha >= start_date, Reporte.fecha <= end_date, Reporte.id_estacion.in_(tuple(stations))).all()
+    fecha = datetime.today()
+    css = os.path.join(current_app.root_path,'static/assets/custom/css/reporte-main.css')
+    html = render_template('home/reports/detailed_report_tqs.html', reports=reports, fecha=fecha)
+    pdf = pdfkit.from_string(html,False,css=css)
+    response = make_response(pdf)
+    response.headers["Content-Type"] = "application/pdf"
+    response.headers["Content-Disposition"] = "attachment; filename=Reporte.pdf"
+    return response
 
 
 @blueprint.route('reporte/excel/<id_reporte>', methods=['GET'])
@@ -167,7 +180,7 @@ def run_listar():
 
 def sftp_connection_new():
     with scheduler.app.app_context():
-        fecha = date(2021, 10, 15)
+        fecha = date(2021, 10, 16)
         print(fecha)
         for empresa in Empresa.query.filter_by(ftp_on = True).all():
             cnopts = pysftp.CnOpts()

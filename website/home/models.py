@@ -7,7 +7,6 @@ from website import db , login_manager, ma
 from website.authentication.utils import hash_pass
 from sqlalchemy.sql import func
 from sqlalchemy import event
-from website.settings.models import Producto
 from datetime import datetime, date
 from ..settings.models import Producto
 
@@ -18,15 +17,15 @@ class Reporte(db.Model):
     estacion = db.relationship('Estacion', backref='estacion', passive_deletes=True)
     fecha = db.Column(db.Date)
     estado = db.Column(db.String(50))
-    creado_en = db.Column(db.DateTime(timezone=False),default=func.now())
-    creado_por = db.Column(db.Integer)
-    escrito_en = db.Column(db.DateTime(timezone=False), onupdate=func.now())
-    escrito_por = db.Column(db.Integer)
     compra = db.relationship('Reporte_Linea_Compra', backref='compra', passive_deletes=True)
     venta = db.relationship('Reporte_Linea_Venta', backref='venta', passive_deletes=True)
     excel = db.Column(db.Text)
     dispensarios = db.Column(db.Integer)
     mangueras = db.Column(db.Integer)
+    creado_en = db.Column(db.DateTime(timezone=False),default=func.now())
+    creado_por = db.Column(db.Integer)
+    escrito_en = db.Column(db.DateTime(timezone=False), onupdate=func.now())
+    escrito_por = db.Column(db.Integer)   
     
 class Reporte_Linea_Compra(db.Model):
     __tablename__='reporte_lineas_compras'
@@ -58,6 +57,7 @@ class Reporte_Linea_Venta(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     id_reporte = db.Column(db.Integer, db.ForeignKey('reportes.id'), nullable=False, index=True)
     id_producto = db.Column(db.Integer, db.ForeignKey('productos.id'), nullable=False, index=True)
+    producto_venta = db.relationship('Producto', backref='producto_venta', passive_deletes=False)
     numeroTotalRegistrosDetalle = db.Column(db.Integer, nullable=False)
     numeroDispensario = db.Column(db.String(2))
     identificadorManguera = db.Column(db.String(1))

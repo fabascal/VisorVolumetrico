@@ -6,7 +6,6 @@ from flask_marshmallow import Marshmallow
 from importlib import import_module
 from flask_apscheduler import APScheduler
 
-
 db = SQLAlchemy()
 login_manager = LoginManager()
 ma = Marshmallow()
@@ -40,6 +39,7 @@ def configure_database(app):
 
 def create_app(config):
     app = Flask(__name__)
+    app.static_folder = 'static'
     app.config.from_object(config) 
     register_extensions(app)
     register_blueprints(app)

@@ -55,9 +55,6 @@
             <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
               <i class="fas fa-minus"></i>
             </button>
-            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
-              <i class="fas fa-times"></i>
-            </button>
           </div>
         </div>
         <div class="card-body">
@@ -100,7 +97,7 @@
                             <h3 class="card-title">
                               <img class="img-circle img-bordered-sm" src="/static/assets/img/gas-tank.jpg" alt="user image">
                                 <span class="username">
-                                  <a href="#">Tanques</a>
+                                  <a href="{{url_for('home_blueprint.report_detail_tqs', stations=(reporte.id_estacion) , start_date=reporte.fecha,end_date=reporte.fecha )}}">Tanques</a>
                                 </span>
                                 <span class="description">{{"{:,.0f}".format(reporte.compra|length)}} Tanques - Litros disponibles {{ "{:,.2f}".format(reporte.compra|map(attribute="volumenDisponible")|sum) }}</span>
                             </h3>
@@ -142,6 +139,7 @@
                                       </span>
                                     {% endif %}
                                   </td>
+                                  
                                 </tr>
                                 {% endfor %}
                               </tbody>
@@ -166,69 +164,33 @@
                         </span>
                         <span class="description">{{"{:,.0f}".format(reporte.dispensarios)}} Dispensario(s) | {{"{:,.0f}".format(reporte.mangueras)}} Manguera(s) - Servicios realizados {{ "{:,.0f}".format(reporte.venta|map(attribute="numeroTotalRegistrosDetalle")|sum)}}</span>
                             </h3>
-            
-                            <div class="card-tools">
-                              <ul class="pagination pagination-sm float-right">
-                                <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
-                                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
-                              </ul>
-                            </div>
                           </div>
                           <!-- /.card-header -->
                           <div class="card-body p-0">
-                            <table class="table">
+                            <table id="dispensarios" class="table table-hover">
                               <thead>
                                 <tr>
-                                  <th style="width: 10px">#</th>
-                                  <th>Task</th>
-                                  <th>Progress</th>
-                                  <th style="width: 40px">Label</th>
+                                  <th style="width:1px;">#</th>
+                                  <th>Dispensario</th>
+                                  <th>Manguera</th>
+                                  <th>Producto</th>
+                                  <th>Ventas</th>
+                                  <th>Litros</th>
+                                  <th>Venta ($)</th>
                                 </tr>
                               </thead>
                               <tbody>
-                                <tr>
-                                  <td>1.</td>
-                                  <td>Update software</td>
-                                  <td>
-                                    <div class="progress progress-xs">
-                                      <div class="progress-bar progress-bar-danger" style="width: 55%"></div>
-                                    </div>
-                                  </td>
-                                  <td><span class="badge bg-danger">55%</span></td>
+                                {% for venta in reporte.venta|sort(attribute='id') %}
+                                <tr>           
+                                  <td style="width:1px;">{{ venta.id}}</td>                       
+                                  <td>{{ venta.numeroDispensario }}</td>
+                                  <td>{{ venta.identificadorManguera }}</td>
+                                  <td>{{ venta.producto_venta.nombre }}</td>
+                                  <td>{{ venta.numeroTotalRegistrosDetalle }}</td>
+                                  <td>{{ "{:,.4f}".format(venta.sumatoriaVolumenDespachado) }}</td>
+                                  <td>${{ "{:,.2f}".format(venta.sumatoriaVentas) }}</td>
                                 </tr>
-                                <tr>
-                                  <td>2.</td>
-                                  <td>Clean database</td>
-                                  <td>
-                                    <div class="progress progress-xs">
-                                      <div class="progress-bar bg-warning" style="width: 70%"></div>
-                                    </div>
-                                  </td>
-                                  <td><span class="badge bg-warning">70%</span></td>
-                                </tr>
-                                <tr>
-                                  <td>3.</td>
-                                  <td>Cron job running</td>
-                                  <td>
-                                    <div class="progress progress-xs progress-striped active">
-                                      <div class="progress-bar bg-primary" style="width: 30%"></div>
-                                    </div>
-                                  </td>
-                                  <td><span class="badge bg-primary">30%</span></td>
-                                </tr>
-                                <tr>
-                                  <td>4.</td>
-                                  <td>Fix and squish bugs</td>
-                                  <td>
-                                    <div class="progress progress-xs progress-striped active">
-                                      <div class="progress-bar bg-success" style="width: 90%"></div>
-                                    </div>
-                                  </td>
-                                  <td><span class="badge bg-success">90%</span></td>
-                                </tr>
+                                {% endfor %}
                               </tbody>
                             </table>
                           </div>
@@ -236,9 +198,7 @@
                         </div>
                       </div>
                       <!-- /.user-block -->
-                      <p>
-                        <a href="#" class="link-black text-sm"><i class="fas fa-link mr-1"></i> Demo File 2</a>
-                      </p>
+                      
                     </div>
 
                     
@@ -265,7 +225,7 @@
                     <i class="far fa-fw fa-file-excel"></i> {{reporte.estacion.nombre}} {{reporte.fecha}}.xlsx</a>
                 </li>
                 <li>
-                  <a href="" class="btn-link text-secondary"><i class="far fa-fw fa-file-pdf"></i> UAT.pdf</a>
+                  <a href="{{url_for('home_blueprint.report_detail_tqs', stations=(reporte.id_estacion) , start_date=reporte.fecha,end_date=reporte.fecha )}}" class="btn-link text-secondary"><i class="far fa-fw fa-file-pdf"></i> Tanques.pdf</a>
                 </li>
                 <li>
                   <a href="" class="btn-link text-secondary"><i class="far fa-fw fa-envelope"></i> Email-from-flatbal.mln</a>
@@ -318,6 +278,25 @@
         "bLengthChange": false,
         "bInfo":false,
         "pageLength":4
+      });
+     
+    });
+    $(function () {
+      $("#dispensarios").DataTable({
+        "columnDefs": [
+            {
+                "targets": [ 0 ],
+                "visible": false,
+                "searchable": false
+            },
+        ],
+        "responsive": false,
+        "autoWidth": false,
+        "searching":false,
+        "paging": true,
+        "bLengthChange": false,
+        "bInfo":false,
+        "pageLength":8
       });
      
     });
