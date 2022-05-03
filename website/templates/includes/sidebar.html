@@ -46,7 +46,7 @@
               </p>
             </a>
           </li>
-          <li class="nav-item has-treeview {% if 'reportes' in segment %} menu-open {% endif %}">
+          <li class="nav-item has-treeview {% if 'procesamiento' in segment %} menu-open {% endif %}">
             <a href="#" class="nav-link {% if 'reportes' in segment %} active {% endif %}">
               <i class="fas fa-tasks nav-icon"></i>
               <p>
@@ -62,7 +62,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="/index2.html" class="nav-link {% if 'index2.html' in segment %} active {% endif %}">
+                <a href="{{url_for('home_blueprint.calendario')}}" class="nav-link {% if 'calendario' in segment %} active {% endif %}">
                   <i class="fas fa-calendar-alt nav-icon"></i>
                   <p>Calendario</p>
                 </a>

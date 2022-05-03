@@ -9,21 +9,47 @@
 </head>
 <body>
     <header>
-        <a>Reporte de tanques</a>
+        <div class="header-helper">
+            <div class="title"> <em> Reporte de tanques </em></div>
+            <div class="content" >
+                <div style="padding:.5em; display: flex;">
+                    <label for="stations" style="padding: .25em 0;">Estacion(es):</label>
+                    <div style=" padding:.25em; border-radius: .5em;">
+                        {% for estacion in reports|map(attribute='estacion')|map(attribute='nombre')|unique|list %}
+                        <strong class="text-title">
+                            {{ estacion }}
+                            {% if loop.nextitem %}
+                            ,
+                            {%endif%}
+                        </strong>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div style="padding:.5em;">
+                    <label for="stations">Periodo:</label> 
+                    <strong class="text-title">{{ reports|map(attribute='fecha')|min }}</strong>
+                    <strong class="text-title">-</strong>
+                    <strong class="text-title">{{  reports|map(attribute='fecha')|max }}</strong>
+                </div>
+            </div>
+        </div>
+        
     </header>
     <div id="main">
         <article>
             {% for report in reports %}
             <table id="report" class="table table-secondary">
                 
-                <span style="font-weight: bold;">{{ report.estacion.nombre }}</span>
+                <span style="font-weight: bold;">{{ report.estacion.nombre }} - {{ report.fecha }}</span>
                
                 <thead>
                     <tr>
                         <th>Producto</th>
-                        <th># Tan</th>
-                        <th>LTS</th>
-                        <th>Vol Agua</th>
+                        <th>Agua</th>
+                        <th>Recepción</th>
+                        <th>Extracción</th>
+                        <th>Disponible</th>
+                        <th>Capacidad</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -31,9 +57,11 @@
                     {% for tqs in report.compra %}
                     <tr>
                         <td>{{tqs.producto.nombre}}</td>
-                        <td>{{tqs.numeroTanque}}</td>
-                        <td>{{"{:,.2f}".format(tqs.volumenDisponible) }}</td>
-                        <td>{{"{:,.2f}".format(tqs.volumenAgua) }}</td>
+                        <td>{{ "{:,.2f}".format(tqs.volumenAgua) }}</td>
+                        <td>{{ "{:,.2f}".format(tqs.volumenRecepcion) }}</td>
+                        <td>{{ "{:,.2f}".format(tqs.volumenExtraccion) }}</td>
+                        <td>{{ "{:,.2f}".format(tqs.volumenDisponible) }}</td>
+                        <td>{{ "{:,.2f}".format(tqs.capacidadTotalTanque) }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -43,7 +71,7 @@
         </article>
         
     </div>
-    <footer>Footer</footer>
+    <!--<footer>Footer</footer>-->
     
 </body>
 

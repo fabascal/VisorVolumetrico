@@ -64,7 +64,7 @@
                 <div class="col-12 col-sm-4">
                   <div class="info-box bg-light">
                     <div class="info-box-content">
-                      <span class="info-box-text text-center text-muted">Litros comprados</span>
+                      <span class="info-box-text text-center text-muted">Litros recepción</span>
                       <span class="info-box-number text-center text-muted mb-0">{{ "{:,.2f}".format(reporte.compra|map(attribute="volumenRecepcion")|sum) }}</span>
                     </div>
                   </div>
@@ -97,7 +97,7 @@
                             <h3 class="card-title">
                               <img class="img-circle img-bordered-sm" src="/static/assets/img/gas-tank.jpg" alt="user image">
                                 <span class="username">
-                                  <a href="{{url_for('home_blueprint.report_detail_tqs', stations=(reporte.id_estacion) , start_date=reporte.fecha,end_date=reporte.fecha )}}">Tanques</a>
+                                  <a href="{{url_for('home_blueprint.report_detail_tqs', stations=(reporte.id_estacion) , start_date=reporte.fecha,end_date=reporte.fecha )}}" target="_blank">Tanques</a>
                                 </span>
                                 <span class="description">{{"{:,.0f}".format(reporte.compra|length)}} Tanques - Litros disponibles {{ "{:,.2f}".format(reporte.compra|map(attribute="volumenDisponible")|sum) }}</span>
                             </h3>
@@ -225,16 +225,15 @@
                     <i class="far fa-fw fa-file-excel"></i> {{reporte.estacion.nombre}} {{reporte.fecha}}.xlsx</a>
                 </li>
                 <li>
-                  <a href="{{url_for('home_blueprint.report_detail_tqs', stations=(reporte.id_estacion) , start_date=reporte.fecha,end_date=reporte.fecha )}}" class="btn-link text-secondary"><i class="far fa-fw fa-file-pdf"></i> Tanques.pdf</a>
+                  <a href="{{url_for('home_blueprint.report_detail_tqs', stations=(reporte.id_estacion) , start_date=reporte.fecha,end_date=reporte.fecha )}}" 
+                  class="btn-link text-secondary"><i class="far fa-fw fa-file-pdf"></i> Tanques.pdf</a>
                 </li>
                 <li>
-                  <a href="" class="btn-link text-secondary"><i class="far fa-fw fa-envelope"></i> Email-from-flatbal.mln</a>
+                  <a href="{{url_for('home_blueprint.report_detail_disp', stations=(reporte.id_estacion) , start_date=reporte.fecha,end_date=reporte.fecha )}}" 
+                  class="btn-link text-secondary"><i class="far fa-fw fa-file-pdf"></i> Dispensarios.pdf</a>
                 </li>
                 <li>
-                  <a href="" class="btn-link text-secondary"><i class="far fa-fw fa-image "></i> Logo.png</a>
-                </li>
-                <li>
-                  <a href="" class="btn-link text-secondary"><i class="far fa-fw fa-file-word"></i> Contract-10_12_2014.docx</a>
+                  <a href="" class="btn-link text-secondary"><i class="far fa-fw fa-envelope"></i> Correo</a>
                 </li>
               </ul>
              

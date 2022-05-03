@@ -13,7 +13,7 @@ class Producto(db.Model):
     __tablename__='productos'
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(30), unique=True, nullable=False)
-    #nombre_corto = db.Column(db.String(30), unique=True, nullable=False)
+    #nombre_corto = db.Column(db.String(30), unique=True, nullable=False, default="a")
     claveProducto = db.Column(db.String(2), unique=False, nullable=False)
     claveSubProducto = db.Column(db.String(1), unique=True, nullable=False)
     creado_en = db.Column(db.DateTime(timezone=False),default=func.now())

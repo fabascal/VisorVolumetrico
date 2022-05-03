@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/static/assets/custom/css/reporte-main.css">
+</head>
+<body>
+    <header>
+        <div class="header-helper">
+            <div class="title"> <em> Reporte de dispensarios </em></div>
+            <div class="content" >
+                <div style="padding:.5em; display: flex;">
+                    <label for="stations" style="padding: .25em 0;">Estacion(es):</label>
+                    <div style=" padding:.25em; border-radius: .5em;">
+                        {% for estacion in reports|map(attribute='estacion')|map(attribute='nombre')|unique|list %}
+                        <strong class="text-title">
+                            {{ estacion }}
+                            {% if loop.nextitem %}
+                            ,
+                            {%endif%}
+                        </strong>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div style="padding:.5em;">
+                    <label for="stations">Periodo:</label> 
+                    <strong class="text-title">{{ reports|map(attribute='fecha')|min }}</strong>
+                    <strong class="text-title">-</strong>
+                    <strong class="text-title">{{  reports|map(attribute='fecha')|max }}</strong>
+                </div>
+            </div>
+        </div>
+        
+    </header>
+    <div id="main">
+        <article>
+            {% for report in reports %}
+            <table id="report" class="table table-secondary">
+                
+                <span style="font-weight: bold;">{{ report.estacion.nombre }} - {{ report.fecha }}</span>
+               
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Dispensario</th>
+                        <th>Manguera</th>
+                        <th>Servicios</th>
+                        <th>Volumen</th>
+                        <th>Venta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    {% for disp in report.venta %}
+                    <tr>
+                        <td>{{disp.producto_venta.nombre}}</td>
+                        <td>{{ disp.numeroDispensario }}</td>
+                        <td>{{ disp.identificadorManguera }}</td>
+                        <td>{{ disp.numeroTotalRegistrosDetalle }}</td>
+                        <td>{{ "{:,.2f}".format(disp.sumatoriaVolumenDespachado) }}</td>
+                        <td>{{ "{:,.2f}".format(disp.sumatoriaVentas) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                
+            </table>
+            {% endfor %}
+        </article>
+        
+    </div>
+    <!--<footer>Footer</footer>-->
+    
+</body>
+
+</html>

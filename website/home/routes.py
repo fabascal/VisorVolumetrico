@@ -32,16 +32,18 @@ import pandas as pd
 
 import pdfkit
 
+COLOR_DANGER = 'rgb( 241, 148, 138 )'
+COLOR_WARNING = 'rgb( 249, 231, 159 )'
+COLOR_SUCCESS = 'rgb( 174, 214, 241 )'
+
 
 @blueprint.route('/index')
 @login_required
 def index():
     usuario = Usuario.query.filter_by(id=current_user.id).first()
     estaciones = db.session.query(Estacion).count()
-    dia_uno = datetime(date.today().year,date.today().month,1)
-    #dia_uno = datetime(2021,10,1)
-    print (dia_uno)
-    reportes = Reporte.query.filter(extract('month',Reporte.fecha) >= dia_uno.month).all()
+    dia_uno = date(date.today().year,date.today().month,1)
+    reportes = Reporte.query.filter(Reporte.fecha >= dia_uno).all()
     compra = venta_lts = venta_pesos = 0
     for reporte in reportes:
         for c in reporte.compra:
@@ -61,7 +63,7 @@ def reportes(fecha_api):
         response = {'message': f'Reportes filtrados con exito.'}
         return jsonify(response)
     reportes=Reporte.query.filter_by(fecha = str(fecha_api)).all()
-    return render_template('home/reportes.html', segment='reportes_dia', reportes=reportes)
+    return render_template('home/reportes.html', segment='procesamiento_reportes_dia', reportes=reportes)
 
 @blueprint.route('/reporte/<id_reporte>', methods=['POST','GET'])
 @login_required
@@ -70,19 +72,83 @@ def reporte_detail(id_reporte):
     reporte = Reporte.query.filter_by(id=id_reporte).first()
     return render_template('home/reporte-detail.html', segment='reportes_detalle', reporte=reporte)
 
+@blueprint.route('/calendario')
+@login_required
+def calendario():
+    return render_template('home/calendar.html', segment='procesamiento_calendario', events = get_calendar_data(date.today().month))
+
+def get_calendar_data(mes):
+    events = []
+    if mes == 4:
+        events.append(
+            {
+                'title' : 'Demo abril',
+                'start' : '2022-04-01',
+                'end' : '',
+                'eventBackgroundColor' : 'red'
+            })
+        events.append(
+            {
+                'title' : 'Demo abril2',
+                'start' : '2022-04-05',
+                'end' : '',
+                'eventBackgroundColor' : 'LightCoral'
+            })
+        
+    elif mes == 5:
+        events.append(
+            {
+                'title' : 'Demo Danger',
+                'start' : '2022-05-01',
+                'end' : '',
+                'eventBackgroundColor' : COLOR_DANGER
+            })
+        events.append(
+            {
+                'title' : 'Demo Warning',
+                'start' : '2022-05-02',
+                'end' : '',
+                'eventBackgroundColor' : COLOR_WARNING
+            })
+        events.append(
+            {
+                'title' : 'Demo Success',
+                'start' : '2022-05-03',
+                'end' : '',
+                'eventBackgroundColor' : COLOR_SUCCESS
+            })
+    return events
+    
+
 @blueprint.route('/reporte/tanques/<stations>/<start_date>/<end_date>', methods=['POST','GET'])
 @login_required
 def report_detail_tqs(start_date, end_date, stations):
-    reports = Reporte.query.filter(Reporte.fecha >= start_date, Reporte.fecha <= end_date, Reporte.id_estacion.in_(tuple(stations))).all()
+    #sstations = "1,2,3,4,5,6,7,8,9,10,11,12,13"
+    #start_date = date(2021,10,1)
+    reports = Reporte.query.filter(start_date <= Reporte.fecha , Reporte.fecha <= end_date, Reporte.id_estacion.in_(tuple(stations))).all()
     fecha = datetime.today()
     css = os.path.join(current_app.root_path,'static/assets/custom/css/reporte-main.css')
-    html = render_template('home/reports/detailed_report_tqs.html', reports=reports, fecha=fecha)
+    html = render_template('home/reports/detailed_report_tqs.html', reports=reports, fecha=fecha, start_date=start_date, end_date=end_date)
     pdf = pdfkit.from_string(html,False,css=css)
     response = make_response(pdf)
-    response.headers["Content-Type"] = "application/pdf"
-    response.headers["Content-Disposition"] = "attachment; filename=Reporte.pdf"
+    response.headers['Content-Type'] = 'application/x-pdf'
+    response.headers['Content-Disposition'] = 'attachment; filename=Reporte-tqs.pdf'
     return response
 
+@blueprint.route('/reporte/dispensarios/<stations>/<start_date>/<end_date>', methods=['POST','GET'])
+@login_required
+def report_detail_disp(start_date, end_date, stations):
+    #stations = "1,2,3,4,5,6,7,8,9,10,11,12,13"
+    #start_date = date(2021,10,1)
+    reports = Reporte.query.filter(start_date <= Reporte.fecha , Reporte.fecha <= end_date, Reporte.id_estacion.in_(tuple(stations))).all()
+    fecha = datetime.today()
+    css = os.path.join(current_app.root_path,'static/assets/custom/css/reporte-main.css')
+    html = render_template('home/reports/detailed_report_disp.html', reports=reports, fecha=fecha, start_date=start_date, end_date=end_date)
+    pdf = pdfkit.from_string(html,False,css=css)
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/x-pdf'
+    response.headers['Content-Disposition'] = 'attachment; filename=Reporte-disp.pdf'
+    return response
 
 @blueprint.route('reporte/excel/<id_reporte>', methods=['GET'])
 @login_required

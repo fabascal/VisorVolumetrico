@@ -23,7 +23,7 @@
     order: -1;
   }
   header, footer {
-    background: aqua;
+    
     height: auto;
   }
   header > *, footer > *{
@@ -32,16 +32,32 @@
   header, footer, article, nav, aside {
     padding: 1em;
   }
-  header > * {
+  .header-helper{
+    background-color: rgba(0, 0, 0, .2);
+    outline: thick double rgba(0, 0, 0, .8);
+    padding: .5em;
+  }
+  .header-helper > * {
     padding:1em;
     font-size: larger;
     font-weight: bolder ;
   }
+  .header-helper > .title{
+    text-align: center;
+    padding: .5rem;
+    text-decoration:  underline;
+  }
+ 
   .table{
     width:100%;
     margin-bottom:1rem;
     color:#212529;
     background-color:transparent
+  }
+  
+  .header-helper > .content > div > div > .text-title,
+  .header-helper > .content > div > .text-title{
+    font-size: small; padding:.5em 0; border-radius: .5em;
   }
   .table td,.table th{padding:.75rem;vertical-align:top;border-top:1px solid #dee2e6}
   .table thead th{vertical-align:bottom;border-bottom:2px solid #dee2e6}

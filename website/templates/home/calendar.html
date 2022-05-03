@@ -1,0 +1,159 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Calendario {% endblock %} 
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed {% endblock body_class %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+  <!-- fullCalendar 
+  <link rel="stylesheet" href="/static/assets/plugins/fullcalendar/main.min.css">
+  <link rel="stylesheet" href="/static/assets/plugins/fullcalendar-daygrid/main.min.css">
+  <link rel="stylesheet" href="/static/assets/plugins/fullcalendar-timegrid/main.min.css">
+  <link rel="stylesheet" href="/static/assets/plugins/fullcalendar-bootstrap/main.min.css">-->
+  <!-- FullCalendar 5.11.0 -->
+  <link rel="stylesheet" href="/static/assets/fullcalendar-5.11.0/lib/main.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+  <link rel="stylesheet" href="/static/assets/custom/css/calendar.css">
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Calendario</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="{{url_for('home_blueprint.index')}}">Dashboard</a></li>
+              <li class="breadcrumb-item active">Calendario</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-9" style="margin: auto;">
+            <div class="card card-primary">
+              <div class="card-body p-0">
+                <!-- THE CALENDAR -->
+                <div id="calendar"></div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+  <!-- jQuery -->
+  <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+  <!-- Bootstrap -->
+  <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- jQuery UI -->
+  <script src="/static/assets/plugins/jquery-ui/jquery-ui.min.js"></script>
+  <!-- AdminLTE App -->
+  <script src="/static/assets/js/adminlte.min.js"></script>
+  <!-- AdminLTE for demo purposes -->
+  <script src="/static/assets/js/demo.js"></script>
+  <!-- fullCalendar 2.2.5 
+  <script src="/static/assets/plugins/moment/moment.min.js"></script>
+  <script src="/static/assets/plugins/fullcalendar/main.min.js"></script>
+  <script src="/static/assets/plugins/fullcalendar-daygrid/main.min.js"></script>
+  <script src="/static/assets/plugins/fullcalendar-timegrid/main.min.js"></script>
+  <script src="/static/assets/plugins/fullcalendar-interaction/main.min.js"></script>
+  <script src="/static/assets/plugins/fullcalendar-bootstrap/main.min.js"></script>-->
+  <!-- Page specific script -->
+  <!-- FullCalendar 5.11.0 -->
+  <script src="/static/assets/fullcalendar-5.11.0/lib/main.js"></script>
+  <script>
+    var events = '{{ events|tojson }}'
+    document.addEventListener('DOMContentLoaded', function() {
+      var calendarEl = document.getElementById('calendar');
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          aspectRatio : 2,
+          locale : 'es',
+          select : true,
+          events : [
+          {% for event in events %}
+            {
+              title : '{{event.title}}',
+              start : '{{event.start}}',
+              
+              backgroundColor :'{{event.eventBackgroundColor}}',
+              textColor : 'black',
+              eventTextColor : 'black'
+            },
+          {% endfor %}
+          ],
+          headerToolbar: {
+              left :'',
+              center: 'title'
+            },
+            buttonText: { today: "Hoy" },
+            views:{
+              titleFormat: 'MMMM YYYY' 
+            },
+            dateClick: function(info) {
+              alert('clicked ' + info.dateStr);
+            },
+            customButtons: {
+              prev: {
+                text: 'Prev',
+                click: function() {
+                  // so something before
+                  alert(calendar.getDate().getMonth() + 1)
+                  // do the original command
+                  calendar.prev();
+                  // do something after
+                  alert(calendar.getDate().getMonth() + 1)
+                }
+              },
+              next: {
+                text: 'Next',
+                click: function() {
+                  // so something before
+                  alert(calendar.getDate().getMonth() + 1)
+                  // do the original command
+                  calendar.next();
+                  // do something after
+                  alert(calendar.getDate().getMonth() + 1)
+                }
+              },
+            }
+      });
+      calendar.render();
+      });
+  </script>
+  <!--<script src="/static/assets/custom/js/calendar.js"></script>-->
+ 
+
+{% endblock javascripts %}
