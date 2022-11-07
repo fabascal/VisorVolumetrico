@@ -1,0 +1,214 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Calendario {% endblock %} 
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini layout-fixed <!--layout-navbar-fixed layout-footer-fixed--> {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Dia detallado</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="{{url_for('home_blueprint.index')}}">Dashboard</a></li>
+              <li class="breadcrumb-item"><a href="{{url_for('home_blueprint.calendario')}}">Calendario</a></li>
+              <li class="breadcrumb-item active">Detalle</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="callout callout-info">
+              <h5><i class="fas fa-info"></i> Nota:</h5>
+              La información que se muestra es un detalle de los archivos que se encuentran resguardados en el SFTP, 
+              en caso de que alguno este erróneo se puede volver a procesar de manera individual, 
+              también se pueden borrar todos los registros relacionados con el reporte, 
+              y procesar todas las estaciones faltantes con el botón de Procesar XML”.
+            </div>
+            <!-- Main content -->
+            <div class="invoice p-3 mb-3">
+              <!-- title row -->
+              <div class="row">
+                <div class="col-12">
+                  <h4>
+                    <i class="fas fa-calendar-day"></i> Detalle de dia
+                    <small class="float-right">Fecha: <span id="date">{{date}}</span></small>
+                  </h4>
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- info row -->
+              
+              <!-- /.row -->
+
+              <!-- Table row -->
+              <div class="row">
+                <div class="col-12 table-responsive">
+                  <table class="table table-striped" id="table">
+                    <thead>
+                    <tr>
+                      <th>No° Reporte</th>
+                      <th>Estación</th>
+                      <th>Estado</th>
+                      <th>Lts. Recepción</th>
+                      <th>Lts. Extraídos</th>
+                      <th>Lts. Vendidos</th>
+                      <th>Métodos</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for reporte in reportes %}
+                    <tr>
+                      <td class="nr" id="id-">{{ reporte.id }}</td>
+                      <td>{{ reporte.estacion.nombre }}</td>
+                      <td>{{ reporte.estado }}</td>
+                      <td>{{ "{:,.2f}".format(reporte.compra|map(attribute="volumenRecepcion")|sum) }}</td>
+                      <td>{{ "{:,.2f}".format(reporte.compra|map(attribute="volumenExtraccion")|sum) }}</td>
+                      <td>{{ "{:,.2f}".format(reporte.venta|map(attribute="sumatoriaVolumenDespachado")|sum) }}</td>
+                      <td style="display:flex; justify-content: space-around;" >
+                        <a style="cursor:pointer;" class="detailReport" title="Reporte detallado" href="{{url_for('home_blueprint.reporte_detail', id_reporte=reporte.id)}}">
+                          <i class="fas fa-file-alt"></i>
+                        </a>
+                        <a style="cursor:pointer;" class="deleteReport" title="Borrar reporte">
+                          <i class="fas fa-trash-alt"></i>
+                        </a>
+                        <a style="cursor:pointer;" class="redoReport" title="Procesar nuevamente">
+                          <i class="fas fa-redo"></i>
+                        </a>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+
+              <div class="row">
+                <!-- accepted payments column -->
+                <div class="col-6">
+                  
+                  
+                </div>
+                <!-- /.col -->
+                <div class="col-6">
+                  <p class="lead">Resumen del dia <span id="fecha">{{date}}</span></p>
+
+                  <div class="table-responsive">
+                    <table class="table">
+                      <tr>
+                        <th style="width:50%">Trabajadas:</th>
+                        <td>
+                          {{ reportes|selectattr('estado','equalto','Terminado')|list|length }}
+                           de 
+                          {{ estaciones }}
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Litros recepción:</th>
+                        <td>
+                          {% set vars = {'total_amount': 0} %}
+                          {% for reporte in reportes %}
+                            {% if vars.update({'total_amount':vars.total_amount + reporte.compra|map(attribute="volumenRecepcion")|sum}) %}{% endif %}
+                          {% endfor %}
+                          {{"{:,.2f}".format(vars.total_amount)}}
+                        </td>
+                      </tr>
+                      <tr>  
+                        <th>Litros extraídos:</th>
+                        <td>
+                          {% set vars = {'total_amount': 0} %}
+                          {% for reporte in reportes %}
+                            {% if vars.update({'total_amount':vars.total_amount + reporte.compra|map(attribute="volumenExtraccion")|sum}) %}{% endif %}
+                          {% endfor %}
+                          {{"{:,.2f}".format(vars.total_amount)}}
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Servicios realizados:</th>
+                        <td>
+                          {% set vars = {'total_amount': 0} %}
+                          {% for reporte in reportes %}
+                            {% if vars.update({'total_amount':vars.total_amount + reporte.venta|map(attribute="numeroTotalRegistrosDetalle")|sum}) %}{% endif %}
+                          {% endfor %}
+                          {{"{:,.2f}".format(vars.total_amount)}}
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Litros vendidos:</th>
+                        <td>
+                          {% set vars = {'total_amount': 0} %}
+                          {% for reporte in reportes %}
+                            {% if vars.update({'total_amount':vars.total_amount + reporte.venta|map(attribute="sumatoriaVolumenDespachado")|sum}) %}{% endif %}
+                          {% endfor %}
+                          {{"{:,.2f}".format(vars.total_amount)}}
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+              <!-- this row will not appear when printing -->
+              <div class="row no-print">
+                <div class="col-12">
+                  <button type="button" class="btn btn-primary float-right" style="margin-right: 5px;" id="btn-read-sftp">
+                    <i class="fas fa-file-import"></i> Procesar XML
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- /.invoice -->
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <input type="hidden" id="update_report" name="variable" value="{{ url_for('home_blueprint.update_report') }}">
+  <input type="hidden" id="read_sftp" name="variable" value="{{ url_for('home_blueprint.redo_read_sftp') }}">
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+  <!-- jQuery -->
+  <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+  <!-- Bootstrap 4 -->
+  <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- AdminLTE App -->
+  <script src="/static/assets/js/adminlte.min.js"></script>
+  <!-- Script de pagina -->
+  <script src="/static/assets/custom/js/calendar-detail.js"></script>
+  <!-- Script BlockUI -->
+  <script src="/static/assets/custom/js/jquery.blockUI.js"></script>
+
+{% endblock javascripts %}

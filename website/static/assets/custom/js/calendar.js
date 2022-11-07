@@ -5,7 +5,18 @@ var calendar = new FullCalendar.Calendar(calendarEl, {
     aspectRatio : 2,
     locale : 'es',
     select : true,
-    events : events,
+    events : [
+      {% for event in events %}
+        {
+          title : '{{event.title}}',
+          start : '{{event.start}}',
+          
+          backgroundColor :'{{event.eventBackgroundColor}}',
+          textColor : 'black',
+          eventTextColor : 'black'
+        },
+      {% endfor %}
+      ],
     headerToolbar: {
         left :'',
         center: 'title'

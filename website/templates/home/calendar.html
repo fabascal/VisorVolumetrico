@@ -83,37 +83,30 @@
   <script src="/static/assets/js/adminlte.min.js"></script>
   <!-- AdminLTE for demo purposes -->
   <script src="/static/assets/js/demo.js"></script>
-  <!-- fullCalendar 2.2.5 
-  <script src="/static/assets/plugins/moment/moment.min.js"></script>
-  <script src="/static/assets/plugins/fullcalendar/main.min.js"></script>
-  <script src="/static/assets/plugins/fullcalendar-daygrid/main.min.js"></script>
-  <script src="/static/assets/plugins/fullcalendar-timegrid/main.min.js"></script>
-  <script src="/static/assets/plugins/fullcalendar-interaction/main.min.js"></script>
-  <script src="/static/assets/plugins/fullcalendar-bootstrap/main.min.js"></script>-->
   <!-- Page specific script -->
   <!-- FullCalendar 5.11.0 -->
   <script src="/static/assets/fullcalendar-5.11.0/lib/main.js"></script>
   <script>
-    var events = '{{ events|tojson }}'
+    
     document.addEventListener('DOMContentLoaded', function() {
       var calendarEl = document.getElementById('calendar');
       var calendar = new FullCalendar.Calendar(calendarEl, {
           initialView: 'dayGridMonth',
           aspectRatio : 2,
           locale : 'es',
+          displayEventTime: false,
           select : true,
-          events : [
-          {% for event in events %}
-            {
-              title : '{{event.title}}',
-              start : '{{event.start}}',
-              
-              backgroundColor :'{{event.eventBackgroundColor}}',
-              textColor : 'black',
-              eventTextColor : 'black'
+          showNonCurrentDates : false,
+          //events: '/get_calendar_data',
+          events: {
+            url: '/get_calendar_data',
+            type: 'POST',
+            error: function() {
+              alert('Ocurrio un problema cargando los dias.');
             },
-          {% endfor %}
-          ],
+            //color: 'yellow',   // a non-ajax option
+            textColor: 'black' // a non-ajax option
+          },
           headerToolbar: {
               left :'',
               center: 'title'
@@ -122,30 +115,48 @@
             views:{
               titleFormat: 'MMMM YYYY' 
             },
-            dateClick: function(info) {
-              alert('clicked ' + info.dateStr);
+            dateClick: function(info) {      
+              try{
+                date = {'date': info.dateStr}     
+                $.ajax({
+                  type: "POST",
+                  url: "{{ url_for('home_blueprint.calendar_detail_route') }}",
+                  data: JSON.stringify(date),
+                  contentType: "application/json",
+                  dataType: 'json',
+                  success: function(response) {
+                    window.location.href = response.redirect
+                  }
+                  });
+                } catch(error) {
+                  console.log(error)
+                }   
             },
-            customButtons: {
+            customButtons: {            
               prev: {
-                text: 'Prev',
-                click: function() {
+                text: 'Anterior',
+                click: function(info) {
                   // so something before
-                  alert(calendar.getDate().getMonth() + 1)
+                  
+                  let year = calendar.getDate().getFullYear() 
+                  let month = calendar.getDate().getMonth() 
+                  let date = year + "-" + month + "-" + 1
+                  calendar.addEventSource("/get_calendar_data/"+date);
                   // do the original command
                   calendar.prev();
                   // do something after
-                  alert(calendar.getDate().getMonth() + 1)
+                  //alert(calendar.getDate().getMonth() + 1)
                 }
               },
               next: {
-                text: 'Next',
+                text: 'Siguiente',
                 click: function() {
                   // so something before
-                  alert(calendar.getDate().getMonth() + 1)
+                  //alert(calendar.getDate().getMonth() + 1)
                   // do the original command
                   calendar.next();
                   // do something after
-                  alert(calendar.getDate().getMonth() + 1)
+                  //alert(calendar.getDate().getMonth() + 1)
                 }
               },
             }

@@ -162,7 +162,12 @@
                         <span class="username">
                           <a href="#">Dispensarios</a>
                         </span>
-                        <span class="description">{{"{:,.0f}".format(reporte.dispensarios)}} Dispensario(s) | {{"{:,.0f}".format(reporte.mangueras)}} Manguera(s) - Servicios realizados {{ "{:,.0f}".format(reporte.venta|map(attribute="numeroTotalRegistrosDetalle")|sum)}}</span>
+                        <span class="description">
+                          {{"{:,.0f}".format(reporte.dispensarios|default(0, true))}} Dispensario(s) | 
+                          {{"{:,.0f}".format(reporte.mangueras|default(0, true))}} 
+                          Manguera(s) - Servicios realizados 
+                          {{ "{:,.0f}".format(reporte.venta|map(attribute="numeroTotalRegistrosDetalle")|sum|default(0, true))}}
+                        </span>
                             </h3>
                           </div>
                           <!-- /.card-header -->

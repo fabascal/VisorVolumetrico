@@ -30,7 +30,7 @@ class Reporte(db.Model):
 class Reporte_Linea_Compra(db.Model):
     __tablename__='reporte_lineas_compras'
     id = db.Column(db.Integer, primary_key=True)
-    id_reporte = db.Column(db.Integer, db.ForeignKey('reportes.id'), nullable=False, index=True)
+    id_reporte = db.Column(db.Integer, db.ForeignKey('reportes.id', ondelete='CASCADE'), nullable=False, index=True)
     id_producto = db.Column(db.Integer, db.ForeignKey('productos.id'), nullable=False, index=True)
     producto = db.relationship("Producto", backref='producto', passive_deletes=False)
     numeroTanque = db.Column(db.String(2))
@@ -55,7 +55,7 @@ class Reporte_Linea_Compra(db.Model):
 class Reporte_Linea_Venta(db.Model):
     __tablename__='reporte_lineas_venta'
     id = db.Column(db.Integer, primary_key=True)
-    id_reporte = db.Column(db.Integer, db.ForeignKey('reportes.id'), nullable=False, index=True)
+    id_reporte = db.Column(db.Integer, db.ForeignKey('reportes.id', ondelete='CASCADE'), nullable=False, index=True)
     id_producto = db.Column(db.Integer, db.ForeignKey('productos.id'), nullable=False, index=True)
     producto_venta = db.relationship('Producto', backref='producto_venta', passive_deletes=False)
     numeroTotalRegistrosDetalle = db.Column(db.Integer, nullable=False)
