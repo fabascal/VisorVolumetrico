@@ -1,0 +1,7 @@
+/* Estilo para el campo de contraseña en el jsGrid */
+.password-cell {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  

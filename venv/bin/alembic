@@ -1,4 +1,4 @@
-#!/home/chris/Documentos/SmartDesk/venv/bin/python3
+#!/home/chris/Documentos/VisorVolumetrico/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

@@ -1,3 +1,22 @@
+:root {
+    --color-verde-oliva: #8b8c6d;
+    --color-amarillo-tierra: #c5a044;
+    --color-marron-oscuro: #46211a;
+    --color-beige: #f2dcb3;
+    --color-rojo: #e74c3c; /* nuevo color rojo */
+    --color-verde:#00718a;
+  }
+
 .currency:before{
     content: '$';
+}
+
+.iconSuccess{
+    color: var(--color-verde);
+}
+.iconDanger{
+    color: var(--color-rojo);
+}
+.iconWarning{
+    color: var(--color-beige);
 }

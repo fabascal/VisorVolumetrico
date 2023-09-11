@@ -26,10 +26,12 @@ from website.home import models
 from website.authentication import models
 from website.settings import models
 
+print("DEBUG Value:", DEBUG)
+
 if DEBUG:
     app.logger.info('DEBUG       = ' + str(DEBUG))
     app.logger.info('Environment = ' + get_config_mode)
     app.logger.info('DBMS        = ' + app_config.SQLALCHEMY_DATABASE_URI)
-
+app.debug = True
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

@@ -1,0 +1,313 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Alta Dispensario {% endblock %} 
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+  <!-- iCheck for checkboxes and radio inputs -->
+  <link rel="stylesheet" href="/static/assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <!-- Select2 -->
+  <link rel="stylesheet" href="/static/assets/plugins/select2/css/select2.min.css">
+  <link rel="stylesheet" href="/static/assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+  <!-- DataTables -->
+  <link rel="stylesheet" href="/static/assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="/static/assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+  <!--Toastr-->
+  <link rel="stylesheet" href="{{url_for('static', filename='assets/plugins/toastr/toastr.min.css')}}">
+{% endblock stylesheets %}
+
+{% block content %}    
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Alta de Dispensario</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="{{url_for('home_blueprint.index')}}">Dashboard</a></li>
+              <li class="breadcrumb-item"><a href="{{url_for('settings_blueprint.dispensarios')}}">Dispensarios</a></li>
+              <li class="breadcrumb-item active">Alta dispensario</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        
+        <!-- SELECT2 EXAMPLE -->
+        <div class="card card-default">
+          <div class="card-header">
+            <h3 class="card-title">Alta de dispensario</h3>
+
+            <div class="card-tools">
+              
+              
+            </div>
+          </div>
+          <!-- /.card-header -->
+          <form id="form_dispensario" method="POST" autocomplete="off" action="">
+            {{ form.csrf_token() }}
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <!-- Estacion -->
+                <div class="form-group">
+                  {{form.id_estacion.label}}
+                  <select name="id_estacion" class="form-control select2bs4" style="width: 100%;" required >
+                    {% for id, nombre in form.id_estacion.choices %}
+                      <option value={{id}}>{{ nombre }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                {% if form.id_estacion.errors %}
+                  <ul class="errors">
+                    {% for error in form.id_estacion.errors %}
+                      <li>{{ error }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+                <!-- /.form group -->
+              </div>
+              <!-- /.col -->
+              <div class="col-md-6">
+                <!-- numeroDispensario -->
+                <div class="form-group">
+                  {{ form.numeroDispensario.label }}
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fas fa-gas-pump nav-icon"></i></span>
+                    </div>
+                    {{ form.numeroDispensario(placeholder="Numero dispensario", class="form-control", type="text") }}
+                  </div>
+                  <!-- /.input group -->
+                </div>
+                {% if form.numeroDispensario.errors %}
+                  <ul class="errors">
+                    {% for error in form.numeroDispensario.errors %}
+                      <li>{{ error }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+                <!-- /.form group -->                
+              </div>
+              <!-- /.col -->
+            </div> 
+            <!-- /.row -->
+          </div>
+          <div class="container-fluid" style="padding:.75EM">
+            <div class="row" >
+              <div class="col-12">
+                <div class="card" style="box-shadow: 0px 0px 5px 3px rgba(150,150,150,0.4);
+                -webkit-box-shadow: 0px 0px 5px 3px rgba(150,150,150,0.4);
+                -moz-box-shadow: 0px 0px 5px 3px rgba(150,150,150,0.4);">
+                  <div class="card-header">
+                    <h3 class="card-title">Listado de mangueras</h3>
+                    <div style="float: right;">
+                      <button class="btn btn-primary" onclick="agregarNuevaFila()" 
+                        type="button" >
+                        <i class="fas fa-plus"></i>
+                        Agregar manguera
+                      </button>
+                    </div>
+                  </div>
+                  <!-- /.card-header -->
+                  <div class="card-body">
+                    <table id="mangueras" class="table table-bordered table-hover">
+                      <thead>
+                      <tr>
+                        <th>Identificador manguera</th>
+                        <th>Producto</th>
+                        <th>Eliminar</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                        {% for manguera in form.mangueras %}
+                        <tr class="text-center">
+                          <td >{{ manguera.identificadorManguera(class="form-control", type="text")}}</td>
+                          <td >{{ manguera.id_producto (class="form-control", type="text")}}</td>
+                          <td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarManguera(this)">Eliminar</button></td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                        
+                      <!--<tfoot>
+                      </tfoot>-->
+                    </table>
+                  </div>
+                  <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+          </div>
+          <!-- /.container-fluid -->
+          <!-- /.card-body -->
+          <div class="card-footer" style="display:flex">
+            <button type="submit" class="btn btn-primary" style="margin-left: auto;">
+              <i class="far fa-save"></i> Guardar
+          </button>
+          </div>
+        </div>
+        <!-- /.card -->
+      </form>  
+      <!-- /.form -->
+      </div>
+      <!-- /.container-fluid -->
+      <!-- Modal -->
+      
+      <!-- /.modal -->
+    </section>
+    <!-- /.content -->
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+  <!-- jQuery -->
+  <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+  <!-- Bootstrap 4 -->
+  <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- Select2 -->
+  <script src="/static/assets/plugins/select2/js/select2.full.min.js"></script>
+  <!-- Bootstrap4 Duallistbox -->
+  <script src="/static/assets/plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js"></script>
+  <!-- InputMask -->
+  <script src="/static/assets/plugins/moment/moment.min.js"></script>
+  <script src="/static/assets/plugins/inputmask/jquery.inputmask.min.js"></script>
+  <!-- date-range-picker -->
+  <script src="/static/assets/plugins/daterangepicker/daterangepicker.js"></script>
+  <!-- bootstrap color picker -->
+  <script src="/static/assets/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
+  <!-- Tempusdominus Bootstrap 4 -->
+  <script src="/static/assets/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+  <!-- Bootstrap Switch -->
+  <script src="/static/assets/plugins/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+  <!-- AdminLTE App -->
+  <script src="/static/assets/js/adminlte.min.js"></script>
+  <!-- AdminLTE for demo purposes -->
+  <script src="/static/assets/js/demo.js"></script>
+  <!-- DataTables -->
+  <script src="/static/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+  <script src="/static/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+  <script src="/static/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+  <script src="/static/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+  <!--Toastr-->
+  <script src="/static/assets/plugins/toastr/toastr.min.js"></script>
+  <script>
+    $(function () {
+      $("#mangueras").DataTable({
+        "responsive": true,
+        "autoWidth": false,
+      });
+     
+    });
+    $(function () {
+ 
+      $("input[data-bootstrap-switch]").each(function(){
+        $(this).bootstrapSwitch('state', $(this).prop('checked'));
+      });
+
+    })
+  </script>
+  <script>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          toastr.{{ category }}('{{ message }}');
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </script>
+  <script>
+    // Obtener las opciones para el campo id_producto desde el objeto JSON proporcionado por Flask
+    var opcionesIdProducto = {{ opciones_id_producto|safe }};
+    // Función para agregar una nueva fila a la tabla
+    // Función para agregar una nueva fila a la tabla
+function agregarNuevaFila() {
+  // Obtener la tabla de mangueras
+  var manguerasTable = $("#mangueras").DataTable();
+
+  // Generar un índice único para la nueva manguera
+  var indice = manguerasTable.rows().count() + 1;
+
+  // Obtener las opciones para el campo id_producto desde el objeto JSON proporcionado por Flask
+  var opcionesIdProducto = {{ opciones_id_producto|safe }};
+
+  // Agregar la nueva fila a la tabla
+  var rowNode = manguerasTable.row.add([
+    '<input type="text" name="mangueras-' + indice + '-identificadorManguera" class="form-control" value="">',
+    '<select name="mangueras-' + indice + '-id_producto" class="form-control">' + generarOpcionesSelect(opcionesIdProducto) + '</select>',
+    '<button type="button" class="btn btn-danger btn-sm" onclick="eliminarManguera(this)">Eliminar</button>'
+  ]).draw().node();
+
+  // Agregar clases y atributo de ID a la nueva fila
+  $(rowNode).addClass('text-center');
+  $(rowNode).attr('id', 'row-' + indice);
+
+  // Actualizar el valor de mangueras_length en el formulario
+  var manguerasLengthInput = document.getElementById("mangueras_length");
+  manguerasLengthInput.value = manguerasTable.rows().count();
+}
+
+// Función para eliminar una fila de la tabla
+function eliminarManguera(btn) {
+  var row = btn.parentNode.parentNode;
+  var manguerasTable = $("#mangueras").DataTable();
+  manguerasTable.row(row).remove().draw();
+
+  // Actualizar el valor de mangueras_length en el formulario
+  var manguerasLengthInput = document.getElementById("mangueras_length");
+  manguerasLengthInput.value = manguerasTable.rows().count();
+}
+
+  
+    // Función para generar las opciones del select para la nueva fila
+    function generarOpcionesSelect(opciones) {
+      var opcionesHTML = '<option value=""></option>';
+      for (var i = 0; i < opciones.length; i++) {
+        var idProducto = opciones[i][0];
+        var nombreProducto = opciones[i][1];
+        opcionesHTML += '<option value="' + idProducto + '">' + nombreProducto + '</option>';
+      }
+      return opcionesHTML;
+    }
+    
+
+    // Función para eliminar una fila de la tabla
+    function eliminarManguera(btn) {
+      var row = btn.parentNode.parentNode;
+      var manguerasTable = $("#mangueras").DataTable();
+      manguerasTable.row(row).remove().draw();
+    }
+  </script>
+  <script>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          toastr.{{ category }}('{{ message }}');
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </script>
+{% endblock javascripts %}

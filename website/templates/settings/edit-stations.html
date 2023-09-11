@@ -16,8 +16,13 @@
   <!-- Select2 -->
   <link rel="stylesheet" href="/static/assets/plugins/select2/css/select2.min.css">
   <link rel="stylesheet" href="/static/assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+  <!-- DataTables -->
+  <link rel="stylesheet" href="/static/assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="/static/assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+  <!-- Bootstrap4 Duallistbox -->
+  <link rel="stylesheet" href="/static/assets/plugins/bootstrap4-duallistbox/bootstrap-duallistbox.min.css">
 {% endblock stylesheets %}
 
 {% block content %}    
@@ -50,25 +55,25 @@
         <div class="card card-default">
           <div class="card-header">
             <h3 class="card-title">Edición de estacion</h3>
-
             <div class="card-tools">
               
-              
+            
             </div>
           </div>
           <!-- /.card-header -->
-          <form method="POST">
+          <form method="POST" autocomplete="off" action="" enctype="multipart/form-data">
+          {{ form.csrf_token() }}
           <div class="card-body">
             <div class="row">
               <div class="col-md-6">
                 <!-- Nombre -->
                 <div class="form-group">
-                  <label>Nombre:</label>
+                  {{form.nombre.label}}
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text"><i class="fas fa-signature"></i></span>
                     </div>
-                    <input name="nombre" type="text" class="form-control" required style="text-transform: uppercase;" value="{{ estacion.nombre }}">
+                    {{ form.nombre(class="form-control", type="text", style="text-transform: uppercase;") }}
                   </div>
                   <!-- /.input group -->
                 </div>
@@ -76,23 +81,44 @@
 
                 <!-- CRE -->
                 <div class="form-group">
-                  <label>Numero Permiso CRE:</label>
+                  {{form.numeroPermisoCRE.label}}
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span class="input-group-text"><i class="fas fa-id-card"></i></span>
                     </div>
-                    <input name="numeroPermisoCRE" type="text" class="form-control" required style="text-transform: uppercase;" value="{{ estacion.numeroPermisoCRE}}">
+                    {{ form.numeroPermisoCRE(class="form-control", type="text", style="text-transform: uppercase;") }}
                   </div>
                   <!-- /.input group -->
                 </div>
+                <!-- Clave estacion servicio -->
+                <div class="form-group">
+                  {{form.claveEstacionServicio.label}}
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                    </div>
+                    {{ form.claveEstacionServicio(class="form-control", type="text", style="text-transform: uppercase;") }}
+                  </div>
+                </div>
+                <!-- /.form group -->
+                <!-- Clave cliente pemex -->
+                <div class="form-group">
+                  {{form.claveClientePEMEX.label}}
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                    </div>
+                    {{ form.claveClientePEMEX(class="form-control", type="text", style="text-transform: uppercase;") }}
+                  </div>
+                </div>
                 <!-- RUTA -->
                 <div class="form-group">
-                    <label>RUTA:</label>
+                  {{form.ruta.label}}
                     <div class="input-group">
                       <div class="input-group-prepend">
                         <span class="input-group-text"><i class="fas fa-id-card"></i></span>
                       </div>
-                      <input name="ruta" type="text" class="form-control" required value="{{ estacion.ruta}}">
+                      {{ form.ruta(class="form-control", type="text", style="text-transform: uppercase;") }}
                     </div>
                     <!-- /.input group -->
                   </div>
@@ -103,51 +129,155 @@
                 <!-- RFC -->
                 <!-- /.form group -->
                 <div class="form-group">
-                  <label>Empresa</label>
-                  <select name="empresa" class="form-control select2bs4" style="width: 100%;" required >
-                    {% for empresa in empresas %}
-                        {% if empresa.nombre == estacion.id_empresa %}
-                            <option selected="selected">{{ empresa.nombre }}</option>
-                        {% else %}
-                            <option value={{empresa.id}}>{{ empresa.nombre }}</option>
-                        {% endif %}
+                  {{form.id_empresa.label}}
+                  <select name="id_empresa" class="form-control select2bs4" style="width: 100%;" required >
+                    {% for id, nombre in form.id_empresa.choices %}
+                      <option value={{id}}>{{ nombre }}</option>
                     {% endfor %}
                   </select>
                 </div>
-                <!-- /.form-group -->
                 <!-- /.form group -->
                 <div class="form-group">
-                  <label>Zona</label>
-                  <select name="zona" class="form-control select2bs4" style="width: 100%;" required >
-                    {% for zona in zonas %}
-                        {% if zona.nombre == estacion.id_zona %}
-                            <option selected="selected">{{ zona.nombre }}</option>
-                        {% else %}
-                            <option >{{ zona.nombre }}</option>
-                        {% endif %}
+                  {{form.id_zona.label}}
+                  <select name="id_zona" class="form-control select2bs4" style="width: 100%;" required >
+                    {% for id, nombre in form.id_zona.choices %}
+                      <option value={{id}}>{{ nombre }}</option>
                     {% endfor %}
                   </select>
                 </div>
-                <!-- /.form-group -->
-                <!-- /.form group -->
+                <!-- Certificado -->
                 <div class="form-group">
-                    <label>Activa:</label>
-                    <div class="input-group">
-                      {% if estacion.activo %}
-                        <input type="checkbox" name="activo" checked data-bootstrap-switch data-off-color="danger" data-on-color="success">
-                      {% else %}
-                        <input type="checkbox" name="activo" data-bootstrap-switch data-off-color="danger" data-on-color="success">
-                      {% endif %}
-                    </div>
+                  {{form.cer_file.label}}
+                  <div class="custom-file">
+                      {{form.cer_file(class="custom-file-input", type="file", id="cer_file")}}
+                      {{form.cer_file.label(class="custom-file-label") }}
+                      
                   </div>
+                </div>
+                <!-- Llave -->
+                <div class="form-group">
+                  {{form.key_file.label}}
+                  <div class="custom-file">
+                    {{form.key_file(class="custom-file-input", type="file", id="key_file")}}
+                    {{form.key_file.label(class="custom-file-label") }}
+                  </div>
+                </div>
+                <!-- Pem -->
+                <div class="form-group">
+                  {{form.pem_file.label}}
+                  <div class="custom-file">
+                    {{form.pem_file(class="custom-file-input", type="file", id="pem_file")}}
+                    {{form.pem_file.label(class="custom-file-label") }}
+                  </div>
+                </div>
+                <!-- /.form group -->
+                <div class="form-group">
+                  {{form.activo.label}}
+                  <div class="input-group">
+                    {% if form.activo %}
+                        <input type="checkbox" name="activo" checked data-bootstrap-switch data-off-color="danger" data-on-color="success">
+                    {% else %}
+                        <input type="checkbox" name="activo" data-bootstrap-switch data-off-color="danger" data-on-color="success">
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <div class="card card-default">
+              <div class="card-header">
+                <h3 class="card-title">Productos</h3>
+    
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-12">
+                    <div class="form-group">
+                      <select name="id_producto" class="duallistbox" multiple="multiple">
+                        {% for id, nombre in form.id_producto.choices %}
+                            {% if id in form.id_producto.data %}
+                                <option value="{{id}}" selected>{{ nombre }}</option>
+                            {% else %}
+                                <option value="{{id}}">{{ nombre }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    
+                    </div>
+                    <!-- /.form-group -->
+                  </div>
+                  <!-- /.col -->
+                </div>
+                <!-- /.row -->
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.row -->
+          
+          <div class="container-fluid" style="padding:.75EM">
+            <div class="row" >
+              <div class="col-12">
+                <div class="card" style="box-shadow: 0px 0px 5px 3px rgba(150,150,150,0.4);
+                -webkit-box-shadow: 0px 0px 5px 3px rgba(150,150,150,0.4);
+                -moz-box-shadow: 0px 0px 5px 3px rgba(150,150,150,0.4);">
+                  <div class="card-header">
+                    <h3 class="card-title">Listado de tanques</h3>
+                    
+                  </div>
+                  <!-- /.card-header -->
+                  <div class="card-body">
+                    <table id="stations" class="table table-bordered table-hover">
+                      <thead>
+                      <tr>
+                        <th>No° Tanque</th>
+                        <th>Producto</th>
+                        <th>Volumen Util</th>
+                        <th>Volumen Disponible</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                        {% for nested in form.tanques %}
+                      <tr>
+                        <td>{{ nested.no_tanque.data }}</td>
+                        <td>{{ nested.producto.data }}</td>
+                        <td>{{ nested.volumenUtil.data }}</td>
+                        <td>{{ nested.volumenDisponible.data }}</td>
+                      </tr>
+                      {% endfor %}
+                      </tbody>
+                      <!--<tfoot>
+                        
+                      <tr>
+                        <th>Rendering engine</th>
+                        <th>Browser</th>
+                        <th>Platform(s)</th>
+                        <th>Engine version</th>
+                        <th>CSS grade</th>
+                      </tr>
+                      </tfoot>-->
+                    </table>
+                  </div>
+                  <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
               </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
           </div>
+          <!-- /.container-fluid -->
           <!-- /.card-body -->
           <div class="card-footer" style="display:flex">
-            <button type="submit" class="btn btn-primary" style="margin-left: auto;" >Guardar</button>
+            {{ form.submit(class="btn btn-primary", style="margin-left: auto;") }}
           </div>
         </div>
         <!-- /.card -->
@@ -187,10 +317,28 @@
   <script src="/static/assets/plugins/bootstrap-switch/js/bootstrap-switch.min.js"></script>
   <!-- AdminLTE App -->
   <script src="/static/assets/js/adminlte.min.js"></script>
+  <!-- DataTables -->
+  <script src="/static/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+  <script src="/static/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+  <script src="/static/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+  <script src="/static/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+  <!-- bs-custom-file-input -->
+<script src="/static/assets/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
   <!-- AdminLTE for demo purposes -->
   <script src="/static/assets/js/demo.js"></script>
+  <!-- Bootstrap4 Duallistbox -->
+  <script src="/static/assets/plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js"></script>
 
   <script>
+    //Bootstrap Duallistbox
+    $('.duallistbox').bootstrapDualListbox()
+    $(function () {
+      $("#stations").DataTable({
+        "responsive": true,
+        "autoWidth": false,
+      });
+     
+    });
     $(function () {
       //Initialize Select2 Elements
       $('.select2').select2()
@@ -262,5 +410,8 @@
       });
 
     })
+    $(function () {
+      bsCustomFileInput.init();
+    });
   </script>
 {% endblock javascripts %}

@@ -1,0 +1,15 @@
+{
+    "python.analysis.typeCheckingMode": "basic",
+    "console-ninja.darkTheme.error.decorationAttachmentRenderOptions": {
+        "border": null,
+        "borderColor": null,
+        "fontStyle": null,
+        "fontWeight": null,
+        "textDecoration": null,
+        "color": "#fe536a",
+        "backgroundColor": null,
+        "margin": "1em",
+        "width": null,
+        "height": null
+    }
+}

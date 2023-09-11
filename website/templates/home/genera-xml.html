@@ -1,0 +1,541 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Genera XML {% endblock %} 
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+  <!-- iCheck for checkboxes and radio inputs -->
+  <link rel="stylesheet" href="/static/assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <!-- Select2 -->
+  <link rel="stylesheet" href="/static/assets/plugins/select2/css/select2.min.css">
+  <link rel="stylesheet" href="/static/assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+  <!-- DataTables -->
+  <link rel="stylesheet" href="/static/assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="/static/assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+  <!--Toastr-->
+  <link rel="stylesheet" href="{{url_for('static', filename='assets/plugins/toastr/toastr.min.css')}}">
+  <!--Float-->
+  <link rel="stylesheet" href="/static/assets/custom/css/FloatInputClear.css">
+{% endblock stylesheets %}
+
+{% block content %}    
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="hold-transition sidebar-mini">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Genera XML</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="{{url_for('home_blueprint.index')}}">Dashboard</a></li>
+              <li class="breadcrumb-item active">Genera XML</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="content-wrapper">  
+        <!-- SELECT2 EXAMPLE -->
+        <div class="card card-default">
+          <div class="card-header">
+            <h3 class="card-title">Generador de XML</h3>
+          </div>
+          <!-- /.card-header -->
+          <form method="POST" autocomplete="off" action="">
+          {{ form.csrf_token() }}
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <!-- Estacion -->
+                <div class="form-group">
+                  {{form.id_estacion.label}}
+                  <select name="id_estacion" class="form-control select2bs4" style="width: 100%;" required >
+                    {% for id, nombre in form.id_estacion.choices %}
+                      <option value={{id}}>{{ nombre }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                {% if form.id_estacion.errors %}
+                  <ul class="errors">
+                    {% for error in form.id_estacion.errors %}
+                      <li>{{ error }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+                <!-- Version -->
+                <div class="form-group">
+                  {{form.id_version.label}}
+                  <select name="id_version" class="form-control select2bs4" style="width: 100%;" required >
+                    {% for id, nombre in form.id_version.choices %}
+                      <option value={{id}}>{{ nombre }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                {% if form.id_version.errors %}
+                  <ul class="errors">
+                    {% for error in form.id_version.errors %}
+                      <li>{{ error }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+                <!-- /.form group -->
+              </div>
+              <!-- /.col -->
+              <div class="col-md-6">
+                <!-- Date dd/mm/yyyy -->
+                <div class="form-group">
+                  {{form.fecha.label}}
+                  <div class="input-group date" id="fecha" data-target-input="nearest">
+                    {{ form.fecha(class_="form-control datetimepicker-input", type="date") }}
+                  </div>
+                  {% if form.fecha.errors %}
+                    <ul class="errors">
+                        {% for error in form.fecha.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                  {% endif %}
+                  <!-- /.input group -->
+                </div>
+                <!-- /.form group -->
+                <!-- primernrotrn-->
+                <div class="form-group">
+                  {{ form.primernrotrn.label }}
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fas fa-signature"></i></span>
+                    </div>
+                    {{ form.primernrotrn(class="form-control", type="text") }}
+                  </div>
+                  <!-- /.input group -->
+                  {% if form.primernrotrn.errors %}
+                    <ul class="errors">
+                        {% for error in form.primernrotrn.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                  {% endif %}
+                </div>
+                <!-- /.form group -->
+                <!-- ultimonrotrn-->
+                <div class="form-group" style="display:none">
+                  {{ form.ultimonrotrn.label }}
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fas fa-signature"></i></span>
+                    </div>
+                    {{ form.ultimonrotrn(class="form-control", type="text") }}
+                  </div>
+                  <!-- /.input group -->
+                  {% if form.ultimonrotrn.errors %}
+                    <ul class="errors">
+                        {% for error in form.ultimonrotrn.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                  {% endif %}
+                </div>
+                <!-- /.form group -->
+              </div>
+              <!-- /.col -->
+              </div> 
+            <!-- /.row -->
+            <!-- /.card -->
+        <div class="content">
+          <div class="container-fluid">
+          
+            <div class="card card-primary card-outline">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-edit"></i>
+                  Estructura
+                </h3>
+              </div>
+              <div class="card-body">
+                <h4>Datos</h4>
+                <div class="row">
+                  <div class="col-5 col-sm-3">
+                    <div class="nav flex-column nav-tabs h-100" id="vert-tabs-tab" role="tablist" aria-orientation="vertical">
+                      <a class="nav-link active" id="vert-tabs-home-tab" data-toggle="pill" href="#vert-tabs-home" role="tab" aria-controls="vert-tabs-home" aria-selected="true">Tanques</a>
+                      <a class="nav-link" id="vert-tabs-profile-tab" data-toggle="pill" href="#vert-tabs-profile" role="tab" aria-controls="vert-tabs-profile" aria-selected="false">Recepciones</a>
+                      <a class="nav-link" id="vert-tabs-messages-tab" data-toggle="pill" href="#vert-tabs-messages" role="tab" aria-controls="vert-tabs-messages" aria-selected="false">Ventas</a>
+                    </div>
+                  </div>
+                  <div class="col-7 col-sm-9">
+                    <div class="tab-content" id="vert-tabs-tabContent">
+                      <!-- Tanques -->
+                      <div class="tab-pane text-left fade show active" id="vert-tabs-home" role="tabpanel" aria-labelledby="vert-tabs-home-tab">
+                        <div class="card card-solid">
+                          <div class="card-body pb-0">
+                            <div class="row" id="tanques-container">
+                              <!-- Inicia la card -->                   
+                              {% for nested in form.tanques %}
+                              <div class="col-12 col-sm-6 col-md-4 d-flex align-items-stretch flex-column">
+                                <div class="card bg-light d-flex flex-fill">
+                                  <div class="card-header text-muted border-bottom-0 text-center">
+                                    TANQUE - {{ nested.no_tanque.data }}
+                                  </div>
+                                  <div style="display: none;"> {{nested.no_tanque }}</div>
+                                  <div class="card-body pt-0">
+                                    <div class="row">
+                                      <div class="col-12">
+                                        <h2 class="lead">
+                                          <b class="small">{{ nested.producto.data}}</b>
+                                        </h2>
+                                        <hr>
+                                        <ul class="ml-0 mb-0 fa-ul text-muted">
+                                          <li class="small mb-2 "> 
+                                            <b>{{ nested.volumenDisponible.label(style="display:inline") }}: </b> 
+                                            {{ nested.volumenDisponible (class="form-control") }} 
+                                          </li>
+                                          <li class="small mb-2 "> 
+                                            <b>{{ nested.volumenExtraccion.label(style="display:inline") }}: </b> 
+                                            {{ nested.volumenExtraccion (class="form-control")}} 
+                                          </li>
+                                          <li class="small mb-2 "> 
+                                            <b>{{ nested.volumenRecepcion.label(style="display:inline") }}: </b> 
+                                            {{ nested.volumenRecepcion (class="form-control")}} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.claveProducto.label(style="display:inline") }}: </b> 
+                                            {{ nested.claveProducto }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.claveSubProducto.label(style="display:inline") }}: </b> 
+                                            {{ nested.claveSubProducto }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.claveProductoPEMEX.label(style="display:inline") }}: </b> 
+                                            {{ nested.claveProductoPEMEX }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.composicionOctanajeDeGasolina.label(style="display:inline") }}: </b> 
+                                            {{ nested.composicionOctanajeDeGasolina }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.gasolinaConEtanol.label(style="display:inline") }}: </b> 
+                                            {{ nested.gasolinaConEtanol }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.volumenUtil.label(style="display:inline") }}: </b> 
+                                            {{ nested.volumenUtil }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.volumenFondaje.label(style="display:inline") }}: </b> 
+                                            {{ nested.volumenFondaje }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.volumenAgua.label(style="display:inline") }}: </b> 
+                                            {{ nested.volumenAgua }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.temperatura.label(style="display:inline") }}: </b> 
+                                            {{ nested.temperatura }} 
+                                          </li>
+                                        </ul>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="card-footer">
+                                    <div class="text-right">
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              {% endfor %}
+                            </div>
+                          </div>
+                          <!-- /.card-body -->
+                        </div>
+                        <!-- /.card -->
+                      </div>
+                      <!-- Recepciones -->
+                      <div class="tab-pane fade" id="vert-tabs-profile" role="tabpanel" aria-labelledby="vert-tabs-profile-tab">
+                        <div class="card card-solid">
+                          <div class="card-body pb-0">
+                            <div class="row" id="recepciones-container">
+                              <!-- Inicia la card -->                   
+                              {% for nested_recepciones in form.recepciones %}
+                              <div class="col-12 col-sm-6 col-md-4 d-flex align-items-stretch flex-column">
+                                <div class="card bg-light d-flex flex-fill">
+                                  <div class="card-header text-muted border-bottom-0 text-center">
+                                    TANQUE - {{ nested_recepciones.no_tanque_recepcion.data }}
+                                  </div>
+                                  <div class="card-body pt-0">
+                                    <div class="row">
+                                      <div class="col-12">
+                                        <h2 class="lead">
+                                          <b class="small">{{ nested_recepciones.producto.data}}</b>
+                                        </h2>
+                                        <hr>
+                                        <ul class="ml-0 mb-0 fa-ul text-muted">
+                                          <li class="custom-control custom-checkbox small mb-2">
+                                            {{ nested_recepciones.recepcion(class_="custom-control-input",type="checkbox", onclick="toggleElements(this)") }}
+                                            {{ nested_recepciones.recepcion.label (class="custom-control-label")}}
+                                          </li>
+                                          <li class="small mb-2 "> 
+                                            <b>{{ nested_recepciones.folioUnicoRecepcionCabecera.label(style="display:inline") }}: </b> 
+                                            {{ nested_recepciones.folioUnicoRecepcionCabecera (class="form-control", onchange="folioUnicoRecepcion(this)") }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested_recepciones.folioUnicoRecepcion.label(style="display:inline") }}: </b> 
+                                            {{ nested_recepciones.folioUnicoRecepcion (class="form-control")}} 
+                                          </li>
+                                          <li class="small mb-2" style="display: none;"> 
+                                            <b>{{ nested_recepciones.folioUnicoRelacion.label(style="display:inline") }}: </b> 
+                                            {{ nested_recepciones.folioUnicoRelacion (class="form-control")}} 
+                                          </li>
+                                          <li class="small mb-2 "> 
+                                            <b>{{ nested_recepciones.volumenInicialTanque.label(style="display:inline") }}: </b> 
+                                            {{ nested_recepciones.volumenInicialTanque (class="form-control", onchange="volumenFinal(this)")}} 
+                                          </li>
+                                          <li class="small mb-2 "> 
+                                            <b>{{ nested_recepciones.volumenRecepcion.label(style="display:inline") }}: </b> 
+                                            {{ nested_recepciones.volumenRecepcion (class="form-control", onchange="volumenFinal(this)")}} 
+                                          </li>
+                                          <li class="small mb-2 "> 
+                                            <b>{{ nested_recepciones.volumenFinalTanque.label(style="display:inline") }}: </b> 
+                                            {{ nested_recepciones.volumenFinalTanque (class="form-control")}} 
+                                          </li>
+                                        </ul>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="card-footer">
+                                    <div class="text-right">
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              {% endfor %}
+                            </div>
+                          </div>
+                          <!-- /.card-body -->
+                        </div>
+                        <!-- /.card -->
+                      </div>
+                      <!-- Ventas -->
+                      <div class="tab-pane fade" id="vert-tabs-messages" role="tabpanel" aria-labelledby="vert-tabs-messages-tab">
+                        <div class="card card-solid">
+                          <div class="card-body pb-0">
+                            <div class="row" id="ventas-container">
+                              <!-- Inicia la card -->                   
+                              {% for nested_venta in form.ventas %}
+                              <div class="col-12 col-sm-6 col-md-4 d-flex align-items-stretch flex-column">
+                                <div class="card bg-light d-flex flex-fill">
+                                  <div class="card-header text-muted border-bottom-0 text-center">
+                                    VENTA
+                                  </div>
+                                  <div class="card-body pt-0">
+                                    <div class="row">
+                                      <div class="col-12">
+                                        <h2 class="lead">
+                                          <b class="small">{{ nested_venta.producto.data}}</b>
+                                        </h2>
+                                        <hr>
+                                        <ul class="ml-0 mb-0 fa-ul text-muted">
+                                          <li class="small mb-2" style="display: none;"> 
+                                            <b>{{ nested_venta.id_producto.label(style="display:inline") }}: </b> 
+                                            {{ nested_venta.id_producto (class="form-control")}} 
+                                          </li>
+                                          <li class="small mb-2" style="display: none;"> 
+                                            <b>{{ nested_venta.producto.label(style="display:inline") }}: </b> 
+                                            {{ nested_venta.producto (class="form-control")}} 
+                                          </li>
+                                          <li class="small mb-2" style="display: none;"> 
+                                            <b>{{ nested_venta.claveProductoPEMEX.label(style="display:inline") }}: </b> 
+                                            {{ nested_venta.claveProductoPEMEX (class="form-control")}} 
+                                          </li>
+                                          <li class="small mb-2"> 
+                                            <b>{{ nested_venta.litros.label(style="display:inline") }}: </b> 
+                                            {{ nested_venta.litros (class="form-control", onchange="folioUnicoRecepcion(this)") }} 
+                                          </li>
+                                          <li class="small mb-2"> 
+                                            <b>{{ nested_venta.precio.label(style="display:inline") }}: </b> 
+                                            {{ nested_venta.precio (class="form-control")}} 
+                                          </li>
+                                        </ul>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="card-footer">
+                                    <div class="text-right">
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              {% endfor %}
+                            </div>
+                          </div>
+                          <!-- /.card-body -->
+                        </div>
+                      </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /.card -->
+            </div>
+            <!-- /.card -->
+          </div>
+        </div>
+          </div>
+                    <!-- /.card-body -->
+          <div class="card-footer" style="display:flex">
+            {{ form.submit(class="btn btn-primary", style="margin-left: auto;") }}
+          </div>
+        </div>
+      </div>
+      <!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </form>  
+  <!-- /.form -->
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+  <!-- jQuery -->
+  <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+  <!-- Bootstrap 4 -->
+  <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- Select2 -->
+  <script src="/static/assets/plugins/select2/js/select2.full.min.js"></script>
+  <!-- Bootstrap4 Duallistbox -->
+  <script src="/static/assets/plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js"></script>
+  <!-- InputMask -->
+  <script src="/static/assets/plugins/moment/moment.min.js"></script>
+  <script src="/static/assets/plugins/inputmask/jquery.inputmask.min.js"></script>
+  <!-- date-range-picker -->
+  <script src="/static/assets/plugins/daterangepicker/daterangepicker.js"></script>
+  <!-- bootstrap color picker -->
+  <script src="/static/assets/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
+  <!-- Tempusdominus Bootstrap 4 -->
+  <script src="/static/assets/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+  <!-- Bootstrap Switch -->
+  <script src="/static/assets/plugins/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+  <!-- AdminLTE App -->
+  <script src="/static/assets/js/adminlte.min.js"></script>
+  <!-- AdminLTE for demo purposes -->
+  <script src="/static/assets/js/demo.js"></script>
+  <!-- DataTables -->
+  <script src="/static/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+  <script src="/static/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+  <script src="/static/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+  <script src="/static/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+  <!--Toastr-->
+  <script src="/static/assets/plugins/toastr/toastr.min.js"></script>
+  <script>
+    $(function () {
+      $("#tanques").DataTable({
+        "responsive": true,
+        "autoWidth": false,
+      });
+     
+    });
+    $(function () {
+ 
+      $("input[data-bootstrap-switch]").each(function(){
+        $(this).bootstrapSwitch('state', $(this).prop('checked'));
+      });
+
+    });
+  </script>
+  <script>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          toastr.{{ category }}('{{ message }}');
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </script>
+  <script>
+    function separarMiles(input) {
+        const value = parseFloat(input.value.replace(/ /g, ''));
+        if (!isNaN(value)) {
+            input.value = value.toLocaleString('es-MX');
+        }
+    }
+    </script>
+    <script>
+      $(function() {
+        // Manejar el evento change del select de estación
+        $('select[name="id_estacion"]').change(function() {
+          // Obtener el valor seleccionado
+          var estacionId = $(this).val();
+    
+          // Realizar una petición AJAX para obtener los tanques de la estación
+          $.ajax({
+            url: '/obtener_tanques',  // URL de la ruta que devuelve los tanques
+            method: 'POST',
+            data: {
+              estacion_id: estacionId  // Enviar el ID de la estación seleccionada
+            },
+            success: function(response) {
+              // Actualizar el contenido de los tanques con la respuesta recibida
+              $('#tanques-container').html(response.rendered_tanques);
+              $('#recepciones-container').html(response.rendered_recepciones)
+              $('#ventas-container').html(response.rendered_ventas)
+            },
+            error: function() {
+              // Manejar el error en caso de que la petición falle
+              console.log('Error al obtener los tanques');
+            }
+          });
+        });
+      });
+    </script>
+    <script>
+      function toggleElements(checkbox) {
+        // Llamada de elementos por id
+        myvar = checkbox.id.split('-');
+        var folioUnicoRecepcionCabecera = document.getElementById(myvar[0]+'-'+myvar[1]+'-folioUnicoRecepcionCabecera');
+        var volumenInicialTanque = document.getElementById(myvar[0]+'-'+myvar[1]+'-volumenInicialTanque');
+        var volumenRecepcion = document.getElementById(myvar[0]+'-'+myvar[1]+'-volumenRecepcion');
+        // Validación del checkbox
+        if(checkbox.checked == 1){
+          folioUnicoRecepcionCabecera.removeAttribute('readonly');
+          volumenInicialTanque.removeAttribute('readonly');
+          volumenRecepcion.removeAttribute('readonly');
+        }else{
+          folioUnicoRecepcionCabecera.setAttribute('readonly', true);
+          volumenInicialTanque.setAttribute('readonly', true);
+          volumenRecepcion.setAttribute('readonly', true);
+        }
+      }
+      function folioUnicoRecepcion(input){
+        myvar = input.id.split('-');
+        var folioUnicoRecepcion = document.getElementById(myvar[0]+'-'+myvar[1]+'-folioUnicoRecepcion');
+        var folioUnicoRelacion = document.getElementById(myvar[0]+'-'+myvar[1]+'-folioUnicoRelacion');
+        folioUnicoRelacion.value = input.value
+        folioUnicoRecepcion.value = parseInt(input.value) + 1
+        console.log(input.value)
+      }
+      function volumenFinal(input){
+        myvar = input.id.split('-');
+        var volumenInicialTanque = document.getElementById(myvar[0]+'-'+myvar[1]+'-volumenInicialTanque');
+        var volumenRecepcion = document.getElementById(myvar[0]+'-'+myvar[1]+'-volumenRecepcion');
+        var volumenFinalTanque = document.getElementById(myvar[0]+'-'+myvar[1]+'-volumenFinalTanque');
+        volumenFinalTanque.value = parseInt(volumenInicialTanque.value) + parseInt(volumenRecepcion.value)
+      }
+      </script>
+{% endblock javascripts %}

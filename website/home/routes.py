@@ -14,14 +14,15 @@ from sqlalchemy import and_, func, cast, Date, extract
 from website import db, scheduler, utils
 import website
 from website.home import blueprint
-from flask import Response,render_template, request, jsonify, redirect, url_for, current_app, session, send_file, send_from_directory, make_response
+from flask import Response,render_template,render_template_string, request, jsonify, redirect, url_for, current_app, session, send_file, send_from_directory, make_response,flash
 from flask_login import login_required, current_user
 import datetime
 from datetime import date, datetime
 from decimal import Decimal
 from website.authentication.models import Usuario
-from website.settings.models import Producto, Estacion, Empresa
+from website.settings.models import Producto, Estacion, Empresa, Tanques, Version, estaciones_productos
 from website.home.models import Reporte_Linea_Compra as Compra, Reporte_Linea_Venta as Venta, Reporte, Reporte_Linea_Venta
+from website.home.forms import GeneratorXmlForm, GenXmlTanquesCampos, GenXmlRecepcionesCampos, GenXmlVentas
 
 import pysftp
 from xml.dom import minidom
@@ -30,11 +31,388 @@ import pandas as pd
 
 import pdfkit
 
+from website.home.create_xml import create_xml_11, create_xml_12, create_xml_13
+
+
 COLOR_DANGER = 'rgb( 241, 148, 138 )'
 COLOR_WARNING = 'rgb( 249, 231, 159 )'
 COLOR_SUCCESS = 'rgb( 174, 214, 241 )'
 COLOR_TEXT = 'rgb( 255, 255, 255 )'
 FORMAT_DATE = "%Y-%m-%d"
+
+@blueprint.route('/obtener_tanques', methods=['POST'])
+@login_required
+def obtener_tanques():
+    form = GeneratorXmlForm(request.form)
+    estacion_id = request.form.get('estacion_id')
+    tanques = Tanques.query.filter_by(id_estacion=estacion_id).order_by(Tanques.no_tanque).all()
+    #Obtener productos
+    producto_ids = db.session.query(estaciones_productos.c.producto_id).filter(estaciones_productos.c.estacion_id == estacion_id).all()
+    # Convertir la lista de tuplas a una lista de IDs
+    producto_ids = [item[0] for item in producto_ids]
+    # 2. Consulta la tabla productos
+    productos_obj = db.session.query(Producto).filter(Producto.id.in_(producto_ids)).all()
+    form.tanques.entries.clear()
+    for tanque in tanques:
+        #Tanques
+        tanque_form = GenXmlTanquesCampos()
+        tanque_form.no_tanque = tanque.no_tanque
+        tanque_form.producto = tanque.producto.nombre
+        tanque_form.volumenDisponible = tanque.volumenDisponible
+        tanque_form.volumenExtraccion = tanque.volumenExtraccion
+        tanque_form.volumenRecepcion = tanque.volumenRecepcion 
+        tanque_form.claveProducto = tanque.producto.claveProducto
+        tanque_form.claveProductoPEMEX = tanque.producto.claveProductoPEMEX
+        tanque_form.claveSubProducto = tanque.producto.claveSubProducto
+        tanque_form.composicionOctanajeDeGasolina = tanque.producto.composicionOctanajeDeGasolina
+        tanque_form.gasolinaConEtanol = tanque.producto.gasolinaConEtanol
+        tanque_form.volumenUtil = tanque.volumenUtil
+        tanque_form.volumenFondaje = tanque.volumenFondaje
+        tanque_form.volumenAgua = 0 #tanque.volumenAgua
+        tanque_form.temperatura = 21 #tanque.temperatura
+        form.tanques.append_entry(tanque_form)
+        #Recepcion
+        recepcion_form = GenXmlRecepcionesCampos()
+        recepcion_form.recepcion = False
+        recepcion_form.no_tanque_recepcion = tanque.no_tanque
+        recepcion_form.producto = tanque.producto.nombre
+        recepcion_form.claveProducto = tanque.producto.claveProducto
+        recepcion_form.claveSubProducto = tanque.producto.claveSubProducto
+        recepcion_form.composicionOctanajeDeGasolina = tanque.producto.composicionOctanajeDeGasolina
+        recepcion_form.gasolinaConEtanol = tanque.producto.gasolinaConEtanol
+        recepcion_form.folioUnicoRecepcionCabecera = ""
+        recepcion_form.folioUnicoRecepcion = ""
+        recepcion_form.volumenInicialTanque = 0
+        recepcion_form.volumenFinalTanque = 0
+        recepcion_form.volumenRecepcion = 0
+        recepcion_form.temperatura = 21
+        recepcion_form.fechaYHoraRecepcion = datetime.now()
+        recepcion_form.folioUnicoRelacion = ""
+        form.recepciones.append_entry(recepcion_form)
+    for producto in productos_obj:
+        ventas_form = GenXmlVentas()
+        ventas_form.id_producto = producto.id
+        ventas_form.producto = producto.nombre
+        ventas_form.claveProductoPEMEX = producto.claveProductoPEMEX
+        ventas_form.litros = 0.00
+        ventas_form.precio = 0.00
+        form.ventas.append_entry(ventas_form)
+    #rendered_template = render_template('home/genera-xml.html', segment='procesamiento_generaxml', tanques=tanques)
+    tanques_html = render_template_string('''
+                        <!-- Inicia la card -->                   
+                              {% for nested in form.tanques %}
+                              <div class="col-12 col-sm-6 col-md-4 d-flex align-items-stretch flex-column">
+                                <div class="card bg-light d-flex flex-fill">
+                                  <div class="card-header text-muted border-bottom-0 text-center">
+                                    TANQUE - {{ nested.no_tanque.data }}
+                                  </div>
+                                  <div style="display: none;"> {{nested.no_tanque }}</div>
+                                  <div class="card-body pt-0">
+                                    <div class="row">
+                                      <div class="col-12">
+                                        <h2 class="lead">
+                                          <b class="small">{{ nested.producto.data}}</b>
+                                        </h2>
+                                        <hr>
+                                        <ul class="ml-0 mb-0 fa-ul text-muted">
+                                          <li class="small mb-2 "> 
+                                            <b>{{ nested.volumenDisponible.label(style="display:inline") }}: </b> 
+                                            {{ nested.volumenDisponible (class="form-control") }} 
+                                          </li>
+                                          <li class="small mb-2 "> 
+                                            <b>{{ nested.volumenExtraccion.label(style="display:inline") }}: </b> 
+                                            {{ nested.volumenExtraccion (class="form-control")}} 
+                                          </li>
+                                          <li class="small mb-2 "> 
+                                            <b>{{ nested.volumenRecepcion.label(style="display:inline") }}: </b> 
+                                            {{ nested.volumenRecepcion (class="form-control")}} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.claveProducto.label(style="display:inline") }}: </b> 
+                                            {{ nested.claveProducto }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.claveSubProducto.label(style="display:inline") }}: </b> 
+                                            {{ nested.claveSubProducto }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.claveProductoPEMEX.label(style="display:inline") }}: </b> 
+                                            {{ nested.claveProductoPEMEX }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.composicionOctanajeDeGasolina.label(style="display:inline") }}: </b> 
+                                            {{ nested.composicionOctanajeDeGasolina }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.gasolinaConEtanol.label(style="display:inline") }}: </b> 
+                                            {{ nested.gasolinaConEtanol }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.volumenUtil.label(style="display:inline") }}: </b> 
+                                            {{ nested.volumenUtil }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.volumenFondaje.label(style="display:inline") }}: </b> 
+                                            {{ nested.volumenFondaje }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.volumenAgua.label(style="display:inline") }}: </b> 
+                                            {{ nested.volumenAgua }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested.temperatura.label(style="display:inline") }}: </b> 
+                                            {{ nested.temperatura }} 
+                                          </li>
+                                        </ul>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="card-footer">
+                                    <div class="text-right">
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              {% endfor %}
+                        <!-- Fin de la card -->
+                                          ''', form=form)
+    recepcion_html = render_template_string("""
+                            <!-- Inicia la card -->                   
+                              {% for nested_recepciones in form.recepciones %}
+                              <div class="col-12 col-sm-6 col-md-4 d-flex align-items-stretch flex-column">
+                                <div class="card bg-light d-flex flex-fill">
+                                  <div class="card-header text-muted border-bottom-0 text-center">
+                                    TANQUE - {{ nested_recepciones.no_tanque_recepcion.data }}
+                                  </div>
+                                  <div class="card-body pt-0">
+                                    <div class="row">
+                                      <div class="col-12">
+                                        <h2 class="lead">
+                                          <b class="small">{{ nested_recepciones.producto.data}}</b>
+                                        </h2>
+                                        <hr>
+                                        <ul class="ml-0 mb-0 fa-ul text-muted">
+                                          <li class="custom-control custom-checkbox small mb-2">
+                                            {{ nested_recepciones.recepcion(class_="custom-control-input",type="checkbox", onclick="toggleElements(this)") }}
+                                            {{ nested_recepciones.recepcion.label (class="custom-control-label")}}
+                                          </li>
+                                          <li class="small mb-2 "> 
+                                            <b>{{ nested_recepciones.folioUnicoRecepcionCabecera.label(style="display:inline") }}: </b> 
+                                            {{ nested_recepciones.folioUnicoRecepcionCabecera (class="form-control", onchange="folioUnicoRecepcion(this)") }} 
+                                          </li>
+                                          <li class="small mb-2 " style="display: none;"> 
+                                            <b>{{ nested_recepciones.folioUnicoRecepcion.label(style="display:inline") }}: </b> 
+                                            {{ nested_recepciones.folioUnicoRecepcion (class="form-control")}} 
+                                          </li>
+                                          <li class="small mb-2" style="display: none;"> 
+                                            <b>{{ nested_recepciones.folioUnicoRelacion.label(style="display:inline") }}: </b> 
+                                            {{ nested_recepciones.folioUnicoRelacion (class="form-control")}} 
+                                          </li>
+                                          <li class="small mb-2 "> 
+                                            <b>{{ nested_recepciones.volumenInicialTanque.label(style="display:inline") }}: </b> 
+                                            {{ nested_recepciones.volumenInicialTanque (class="form-control", onchange="volumenFinal(this)")}} 
+                                          </li>
+                                          <li class="small mb-2 "> 
+                                            <b>{{ nested_recepciones.volumenRecepcion.label(style="display:inline") }}: </b> 
+                                            {{ nested_recepciones.volumenRecepcion (class="form-control", onchange="volumenFinal(this)")}} 
+                                          </li>
+                                          <li class="small mb-2 "> 
+                                            <b>{{ nested_recepciones.volumenFinalTanque.label(style="display:inline") }}: </b> 
+                                            {{ nested_recepciones.volumenFinalTanque (class="form-control")}} 
+                                          </li>
+                                        </ul>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="card-footer">
+                                    <div class="text-right">
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              {% endfor %}
+                                            """,form=form)
+    ventas_html = render_template_string("""
+                <!-- Inicia la card -->                   
+                              {% for nested_venta in form.ventas %}
+                              <div class="col-12 col-sm-6 col-md-4 d-flex align-items-stretch flex-column">
+                                <div class="card bg-light d-flex flex-fill">
+                                  <div class="card-header text-muted border-bottom-0 text-center">
+                                    VENTA
+                                  </div>
+                                  <div class="card-body pt-0">
+                                    <div class="row">
+                                      <div class="col-12">
+                                        <h2 class="lead">
+                                          <b class="small">{{ nested_venta.producto.data}}</b>
+                                        </h2>
+                                        <hr>
+                                        <ul class="ml-0 mb-0 fa-ul text-muted">
+                                          <li class="small mb-2" style="display: none;"> 
+                                            <b>{{ nested_venta.id_producto.label(style="display:inline") }}: </b> 
+                                            {{ nested_venta.id_producto (class="form-control")}} 
+                                          </li>
+                                          <li class="small mb-2" style="display: none;"> 
+                                            <b>{{ nested_venta.producto.label(style="display:inline") }}: </b> 
+                                            {{ nested_venta.producto (class="form-control")}} 
+                                          </li>
+                                          <li class="small mb-2" style="display: none;"> 
+                                            <b>{{ nested_venta.claveProductoPEMEX.label(style="display:inline") }}: </b> 
+                                            {{ nested_venta.claveProductoPEMEX (class="form-control")}} 
+                                          </li>
+                                          <li class="small mb-2"> 
+                                            <b>{{ nested_venta.litros.label(style="display:inline") }}: </b> 
+                                            {{ nested_venta.litros (class="form-control", onchange="folioUnicoRecepcion(this)") }} 
+                                          </li>
+                                          <li class="small mb-2"> 
+                                            <b>{{ nested_venta.precio.label(style="display:inline") }}: </b> 
+                                            {{ nested_venta.precio (class="form-control")}} 
+                                          </li>
+                                        </ul>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="card-footer">
+                                    <div class="text-right">
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              {% endfor %}
+    """, form=form)
+    return jsonify(rendered_tanques = tanques_html, rendered_recepciones = recepcion_html, rendered_ventas = ventas_html)
+
+@blueprint.route('/generar', methods=['POST', 'GET'])
+@login_required
+def genera_xml():
+    form = GeneratorXmlForm(request.form)
+    form.id_estacion.choices = [(e.id, e.nombre) for e in Estacion.query.order_by('nombre').all()]
+    # Obtén solo los registros de la tabla Version que tengan el campo "activo" con valor True
+    versions = Version.query.filter(Version.activo.is_(True)).order_by(Version.id).all()
+    # Crea la lista de opciones para el campo "id_version" del formulario
+    form.id_version.choices = [(v.id, v.nombre) for v in versions]
+    estacion_uno = Estacion.query.order_by('nombre').first()
+    tanques = Tanques.query.filter_by(id_estacion=estacion_uno.id).order_by(Tanques.no_tanque).all()
+    #Obtener productos
+    producto_ids = db.session.query(estaciones_productos.c.producto_id).filter(estaciones_productos.c.estacion_id == estacion_uno.id).all()
+    # Convertir la lista de tuplas a una lista de IDs
+    producto_ids = [item[0] for item in producto_ids]
+    # 2. Consulta la tabla productos
+    productos_obj = db.session.query(Producto).filter(Producto.id.in_(producto_ids)).all()
+    # Llenar los tanques en el formulario
+    form.tanques.entries.clear()
+    form.ventas.entries.clear()
+    for tanque in tanques:
+        #Tanques
+        tanque_form = GenXmlTanquesCampos()
+        tanque_form.no_tanque = tanque.no_tanque
+        tanque_form.producto = tanque.producto.nombre
+        tanque_form.volumenDisponible = tanque.volumenDisponible
+        tanque_form.volumenExtraccion = tanque.volumenExtraccion
+        tanque_form.volumenRecepcion = tanque.volumenRecepcion 
+        tanque_form.claveProducto = tanque.producto.claveProducto
+        tanque_form.claveProductoPEMEX = tanque.producto.claveProductoPEMEX
+        tanque_form.claveSubProducto = tanque.producto.claveSubProducto
+        tanque_form.composicionOctanajeDeGasolina = tanque.producto.composicionOctanajeDeGasolina
+        tanque_form.gasolinaConEtanol = tanque.producto.gasolinaConEtanol
+        tanque_form.volumenUtil = tanque.volumenUtil
+        tanque_form.volumenFondaje = tanque.volumenFondaje
+        tanque_form.volumenAgua = 0 #tanque.volumenAgua
+        tanque_form.temperatura = 21 #tanque.temperatura
+        form.tanques.append_entry(tanque_form)
+        #Recepcion
+        recepcion_form = GenXmlRecepcionesCampos()
+        recepcion_form.recepcion = False
+        recepcion_form.no_tanque_recepcion = tanque.no_tanque
+        recepcion_form.producto = tanque.producto.nombre
+        recepcion_form.claveProducto = tanque.producto.claveProducto
+        recepcion_form.claveSubProducto = tanque.producto.claveSubProducto
+        recepcion_form.composicionOctanajeDeGasolina = tanque.producto.composicionOctanajeDeGasolina
+        recepcion_form.gasolinaConEtanol = tanque.producto.gasolinaConEtanol
+        recepcion_form.folioUnicoRecepcionCabecera = ""
+        recepcion_form.folioUnicoRecepcion = ""
+        recepcion_form.volumenInicialTanque = 0
+        recepcion_form.volumenFinalTanque = 0
+        recepcion_form.volumenRecepcion = 0
+        recepcion_form.temperatura = 21
+        recepcion_form.fechaYHoraRecepcion = datetime.now()
+        recepcion_form.folioUnicoRelacion = ""
+        form.recepciones.append_entry(recepcion_form)
+    for producto in productos_obj:
+        ventas_form = GenXmlVentas()
+        ventas_form.id_producto = producto.id
+        ventas_form.producto = producto.nombre
+        ventas_form.claveProductoPEMEX = producto.claveProductoPEMEX
+        ventas_form.litros = 0.00
+        ventas_form.precio = 0.00
+        form.ventas.append_entry(ventas_form)
+    if request.method == 'POST' and form.validate_on_submit():
+        try:
+            data={}
+            data['tanques'] = {}
+            data['recepciones'] = {}
+            data['ventas'] = {}
+            filtered_recepciones = {}  # Diccionario para almacenar solo la recepción filtrada
+            for key, value in request.form.items():
+                if key.startswith('tanques-'):
+                    index = key.split('-')[1]  # Obtener el índice del tanque
+                    field_name = key.split('-')[2]  # Obtener el nombre del campo del tanque
+                    if index not in data['tanques']:
+                        data['tanques'][index] = {}
+                    data['tanques'][index][field_name] = value
+                elif key.startswith('recepciones-'):
+                    index = key.split('-')[1]  # Obtener el índice de la recepcion
+                    field_name = key.split('-')[2]  # Obtener el nombre del campo de la recepcion
+
+                    # Si el campo 'recepcion' tiene un valor 'y', entonces agregamos esta recepción al diccionario filtered_recepciones
+                    if field_name == 'recepcion' and value == 'y':
+                        if index not in filtered_recepciones:
+                            filtered_recepciones[index] = {}
+                        filtered_recepciones[index][field_name] = value
+                    elif index in filtered_recepciones:  # Si ya se ha agregado esta recepción (porque tiene un valor 'y'), guardamos los otros campos también
+                        filtered_recepciones[index][field_name] = value
+                                
+                elif key.startswith('ventas-'):
+                    index = key.split('-')[1]  # Obtener el índice de las ventas
+                    field_name = key.split('-')[2]  # Obtener el nombre del campo de las ventas
+                    if index not in data['ventas']:
+                        data['ventas'][index] = {}
+                    data['ventas'][index][field_name] = value
+                else:
+                    data[key] = value
+
+            data['recepciones'] = filtered_recepciones
+            estacion = Estacion.query.filter_by(id=form.id_estacion.data[0]).first()
+            fecha = form.fecha.data
+            if data['id_version'] == "1":   
+                archivo_xml = create_xml_11(estacion, data)
+            elif data['id_version'] == "2":
+                archivo_xml = create_xml_12(estacion, data)
+            elif data['id_version'] == "3"  :
+                archivo_xml = create_xml_13(estacion, data)
+            else:    
+                archivo_xml = create_xml_13(estacion, data)
+            # Directorio y nombre del archivo
+            path_file = 'website/filestore/xml/'+estacion.nombre+'/'
+            path_file_2 = 'filestore/xml/'+estacion.nombre+'/'
+            if not os.path.exists(path_file):
+                os.makedirs(path_file)
+            name_file = estacion.numeroPermisoCRE.replace('/', '_') +"|"+ str(fecha) +".xml"
+            # Guardar el contenido en el archivo
+            file_path = os.path.join(path_file, name_file)
+            with open(file_path, 'wb') as file:
+                file.write(archivo_xml)
+            return send_from_directory(path_file_2, name_file, as_attachment=True)
+        except ValueError as e:
+            print(e)
+            flash('Error al agregar objeto: ' + str(e), 'error')
+    else:
+        for field, errors in form.errors.items():
+            for error in errors:
+                print(f"Error en el campo {getattr(form, field).label.text}: {error}")
+    
+    return render_template('home/genera-xml.html', segment='procesamiento_generaxml', form=form)
+
 
 @blueprint.route('/index')
 @login_required
@@ -52,7 +430,6 @@ def index():
     #                group_by(extract('year', Reporte.fecha),
     #                extract('month', Reporte.fecha)).\
     #                all()
-    print(reportes_data, reportes_data[2])
     data = {"usuario":usuario}
     return render_template('home/index.html', segment='index', data=data)
 
@@ -65,7 +442,7 @@ def reportes(fecha_api):
         response = {'message': f'Reportes filtrados con exito.'}
         return jsonify(response)
     reportes=Reporte.query.filter_by(fecha = str(fecha_api)).all()
-    return render_template('home/reportes.html', segment='procesamiento_reportes_dia', reportes=reportes)
+    return render_template('home/reportes.html', segment='reportes_reportes_dia', reportes=reportes)
 
 @blueprint.route('/reporte/<id_reporte>', methods=['POST','GET'])
 @login_required
@@ -195,7 +572,7 @@ def report_detail_tqs(start_date, end_date, stations):
     fecha = datetime.today()
     css = os.path.join(current_app.root_path,'static/assets/custom/css/reporte-main.css')
     html = render_template('home/reports/detailed_report_tqs.html', reports=reports, fecha=fecha, start_date=start_date, end_date=end_date)
-    pdf = pdfkit.from_string(html,False,css=css)
+    pdf = pdfkit.from_string(html,css=css)
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/x-pdf'
     response.headers['Content-Disposition'] = 'attachment; filename=Reporte-tqs.pdf'
@@ -421,8 +798,8 @@ def get_file_sftp(reporte):
                 with server.open(file.filename) as xml:
                     doc = minidom.parse(xml)
                     ControlesVolumetricos = []
+                    titulo = {}
                     for d in doc.getElementsByTagName("controlesvolumetricos:ControlesVolumetricos"):
-                        titulo = {}
                         for attribute, value in d.attributes.items():
                             titulo.update({attribute:value})
                     for d in doc.getElementsByTagName("controlesvolumetricos:EXI"):
@@ -606,5 +983,3 @@ def sftp_connection_new():
                         db.session.add(args)
                         db.session.commit()
             
-
-    

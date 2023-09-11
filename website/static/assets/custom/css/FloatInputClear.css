@@ -1,0 +1,10 @@
+.my-float-field {
+    appearance: textfield;
+    -moz-appearance: textfield;
+    -webkit-appearance: textfield;
+    
+}
+.my-float-field::-webkit-outer-spin-button,
+.my-float-field::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}

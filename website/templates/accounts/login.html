@@ -13,16 +13,18 @@
   <!-- icheck bootstrap -->
   <link rel="stylesheet" href="/static/assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
   <!-- Theme style -->
-  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css"> 
 
 {% endblock stylesheets %}
 
 {% block content %}
     <div class="login-box">
-        <div class="login-logo">
-            <a  rel="noopener noreferrer" 
-                href="#"><b>Visor</b>Volumetrico</a>
-        </div>
+      <div class="login-logo brand-link text-center" style="display:flex; align-items: center;">
+        <a rel="noopener noreferrer" href="#" class="mx-auto" style="marging:1rem"> 
+          <img src="/static/assets/img/logo.png" alt="RetVol Logo" class="img-circle elevation-1" style="opacity: .8; width:1em; margin:0 0 .5rem"> 
+          RETVOL
+        </a>
+      </div> 
         <!-- /.login-logo -->
     <div class="card">
         <div class="card-body login-card-body">
@@ -31,7 +33,7 @@
               {% if msg %}
                   {{ msg | safe }}
               {% else %}
-                  Add your credentials
+                  Agrega tus credenciales
               {% endif %}
           </p>
   
@@ -75,13 +77,12 @@
           <br /><br />
   
           <div class="text-center">
-              Not a member? <a href="{{ url_for('authentication_blueprint.register') }}" class="text-center">Register</a>
-              <br />
-              <br />
-              &copy; 
+             
+               <br />
+               
               <a target="_blank" rel="noopener noreferrer"
-                 href="#"><b>Visor</b>Volumetrico</a> 
-              - coded by <a target="_blank" rel="noopener noreferrer" href="#">NovaRet</a>.
+                 href="#">Visor de Archivos Volumetricos</a> 
+              </a>
           </div>
   
         </div>

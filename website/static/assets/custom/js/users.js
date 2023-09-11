@@ -1,4 +1,4 @@
-$(function () {     
+$(function () {
     $.ajax({
         type: "GET",
         url: "/api_groups",
@@ -9,21 +9,12 @@ $(function () {
         $("#jsGrid").jsGrid({
             height: "auto",
             width: "100%",
-  
             inserting: true,
             editing: true,
             sorting: true,
             paging: false,
             autoload: true,
-            invalidMessage:"Algúnos datos estan erróneos, favor de validar el formulario de usuarios.",
-            //confirmDeleting: true,
-            //deleteConfirm: "Do you really want to delete the client?",
-            //filtering: true,
-
-            //rowClick: function(args) {
-            //    showDialog(args.item);
-            //},
-             
+            invalidMessage: "Algunos datos están erróneos, favor de validar el formulario de usuarios.",
             controller: {
                 loadData: function (filter) {
                     return $.ajax({
@@ -50,14 +41,14 @@ $(function () {
                         data: JSON.stringify(item),
                         dataType: "json",
                         contentType: "application/json",
-                    }).done(function(response){
+                    }).done(function (response) {
                         $("#jsGrid").jsGrid("loadData");
                         alert(response.message);
                         d.resolve(response);
-                    }).fail(function(response) {
+                    }).fail(function (response) {
                         alert(JSON.parse(response.responseText).message);
                     });
-                    
+
                 },
                 deleteItem: function (item) {
                     return $.ajax({
@@ -68,21 +59,29 @@ $(function () {
                 }
             },
             fields: [
-                {name: "username", title: "Usuario", type: "text", width: 60, validate: "required"},
-                {name: "email", title: "Correo", type: "text",  width: 50, validate: "required"},
-                {name: "grupo", title: "Grupo", type: "select", items: groups, valueField: "id", textField: "nombre",width: 50, validate: "required"},
-                {name: "activo", title: "Activo", type: "checkbox", width: 50, filtering: false, sorting: false, validate: "required"},
-                {name: "password", title: "Password", align: "center",width: 30,height:10,
-            	itemTemplate: function(value, item) {
-              	return $("<button class='btn btn-default'> <i class='fas fa-unlock-alt'></i> </button>")
-                		.on("click", function() {
-                            //funcion para cambio de contraseña mediante correo.
-               				alert("button clicked" + item.id);
-                      return false;
-                    });
-              }
-            },
-                {type: "control", deleteButton: false,}
+                { name: "username", title: "Usuario", type: "text", width: 60, validate: "required" },
+                { name: "email", title: "Correo", type: "text", width: 50, validate: "required" },
+                { name: "grupo", title: "Grupo", type: "select", items: groups, valueField: "id", textField: "nombre", width: 50, validate: "required"},
+                { name: "activo", title: "Activo", type: "checkbox", width: 50, filtering: false, sorting: false, validate: "required" },
+                {
+                    name: "password", title: "Password", align: "center", width: 60,
+                    itemTemplate: function (value) {
+                        return "<span class='password-cell'>" + value.replace(/./g, '*').slice(0, 10) + "</span>";
+                    },
+                    insertTemplate: function () {
+                        var $input = $("<input type='password'  class='password-input' />");
+                        return $input;
+                    },
+                    editTemplate: function (value, item) {
+                        var $input = $("<input type='password'  class='password-input' />");
+                        $input.val(value);
+                        $input.on("input", function () {
+                            item.password = $(this).val();
+                        }).addClass("password-cell");
+                        return $input;
+                    }
+                },
+                { type: "control", deleteButton: false }
             ]
         });
     });

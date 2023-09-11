@@ -17,6 +17,11 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.sqlite3')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SCHEDULER_API_ENABLED = True
+    LANGUAGES = ['es']
+    
+    # Rutas para cargar y descargar archivos
+    UPLOAD_FOLDER = 'website/filestore/Cer_Key_Pem'
+    ALLOWED_EXTENSIONS = {'key', 'cer', 'pem', 'xml'}
 
 
 
