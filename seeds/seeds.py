@@ -10,7 +10,7 @@ def create_groups(self):
 
 def create_user_admin(self):
   grupo = Grupo.query.filter_by(nombre='Administradores').first()
-  admin = Usuario(nombre="Administrador",email='admin@mail.com',username='Admin',full_name='ADMINISTRADOR',password=str(1234),id_grupo=grupo.id,creado_por=1)
+  admin = Usuario(nombre="Administrador",email='admin@mail.com',username='Admin',full_name='ADMINISTRADOR',password=str(),id_grupo=grupo.id,creado_por=1)
   self.db.session.add(admin)
   self.db.session
   self.db.session.commit()
